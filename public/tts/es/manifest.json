@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "voice": "es-ES-ElviraNeural",
+  "byWord": {
+    "escuela": "escuela.mp3",
+    "amigo": "amigo.mp3"
+  }
+}

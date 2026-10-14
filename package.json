@@ -1,0 +1,33 @@
+{
+  "name": "spelling-test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node node_modules/vite/bin/vite.js",
+    "postinstall": "node scripts/patch-piper-speaker.mjs",
+    "voices:fetch": "node scripts/fetch-piper-voices.mjs",
+    "prebuild": "node scripts/ensure-piper-voices.mjs",
+    "build": "node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
+    "lint": "node node_modules/oxlint/bin/oxlint",
+    "preview": "node node_modules/vite/bin/vite.js preview"
+  },
+  "dependencies": {
+    "@mintplex-labs/piper-tts-web": "^1.0.5",
+    "i18next": "^26.4.4",
+    "onnxruntime-web": "1.18.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-i18next": "^17.0.16",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}
