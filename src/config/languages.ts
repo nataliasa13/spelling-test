@@ -10,8 +10,8 @@ export type SpellingLanguageDef = {
 }
 
 export const spellingLanguages: SpellingLanguageDef[] = [
-  { id: 'english', labelKey: 'words.english', flagSrc: '/flags/gb.svg', weekKey: 'english' },
-  { id: 'spanish', labelKey: 'words.spanish', flagSrc: '/flags/es.svg', weekKey: 'spanish' },
+  { id: 'english', labelKey: 'words.english', flagSrc: `${import.meta.env.BASE_URL}flags/gb.svg`, weekKey: 'english' },
+  { id: 'spanish', labelKey: 'words.spanish', flagSrc: `${import.meta.env.BASE_URL}flags/es.svg`, weekKey: 'spanish' },
 ]
 
 export function getLanguageDef(lang: SpellingLang): SpellingLanguageDef {

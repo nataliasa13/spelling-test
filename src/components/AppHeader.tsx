@@ -2,13 +2,11 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { schoolConfig } from '../config/school'
-import { useEditorAccess } from '../hooks/useEditorAccess'
 
 export function AppHeader() {
   const { t } = useTranslation()
   const location = useLocation()
   const isHome = location.pathname === '/'
-  const isEditor = useEditorAccess()
   const menuId = useId()
   const menuWrapRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -92,16 +90,6 @@ export function AppHeader() {
               >
                 {t('nav.settings')}
               </Link>
-              {isEditor && (
-                <Link
-                  to="/editor"
-                  className="app-header__menu-item"
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {t('nav.editor')}
-                </Link>
-              )}
             </div>
           )}
         </div>

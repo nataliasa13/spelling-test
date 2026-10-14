@@ -1,3 +1,16 @@
+# Spellings Test
+
+## Publicar las palabras de la semana
+
+1. En GitHub, abre `public/week.json` y edítalo (icono del lápiz).
+2. Cambia `weekLabel`, `english`, `spanish` y **pon `publishedAt` a la fecha/hora actual** (ISO, p. ej. `2026-10-19T08:00:00Z`).
+   La app solo aplica la semana publicada si su `publishedAt` es más reciente que la que tiene cada dispositivo.
+3. Commit a `main`. El workflow `Deploy to GitHub Pages` despliega en 1–2 minutos.
+
+Las familias reciben las palabras al abrir la app (o al volver a la pestaña); sin red se queda la última semana guardada.
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

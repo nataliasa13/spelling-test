@@ -9,12 +9,11 @@
     "home": "Home",
     "back": "Back",
     "menu": "Menu",
-    "settings": "Settings",
-    "editor": "Editor"
+    "settings": "Settings"
   },
   "home": {
     "noWeekTitle": "No words this week yet",
-    "noWeekHint": "Ask a grown-up to add or import the list.",
+    "noWeekHint": "Ask a grown-up to publish this week's list.",
     "weekLabel": "Week: {{label}}",
     "wordsCount": "{{en}} English · {{es}} Spanish",
     "thisWeek": "This week's words",
@@ -27,7 +26,6 @@
     "dareLocked": "Unlock when {{need}} words are green",
     "dareLockedBadge": "Locked",
     "dareLockedA11y": "Dare locked: {{mastered}} of {{need}} words green in dictation",
-    "importBanner": "New list from your class — tap to import",
     "disclaimer": "Made by families — not an official school app.",
     "pickDictationLang": "Which spelling list?",
     "pickDictationHint": "Pick English or Spanish first — then choose what to do today.",
@@ -148,38 +146,6 @@
     "liveLettersHint": "Green = good letter · red = check it",
     "liveLettersA11y": "Letters as you type: green correct, red wrong"
   },
-  "parents": {
-    "title": "Parents",
-    "enterPin": "Enter PIN",
-    "enterPinTitle": "Parent PIN",
-    "enterPinHint": "Enter the PIN you created on this device to edit the word lists.",
-    "enterPinSubmit": "Unlock editor",
-    "wrongPin": "Wrong PIN",
-    "setPinTitle": "Create a parent PIN",
-    "setPinHint": "Choose a PIN with at least 6 characters. It stays on this device only.",
-    "setPinSubmit": "Save and continue",
-    "setPinFootnote": "This PIN is not the ?editor= link — it protects the list editor after you unlock it.",
-    "pinNewLabel": "New PIN",
-    "confirmPinPlaceholder": "Type it again",
-    "pinPlaceholder": "Your PIN",
-    "pinTooShort": "Use at least 6 characters",
-    "confirmPin": "Confirm PIN",
-    "pinMismatch": "PINs don't match",
-    "weekLabel": "Week name",
-    "weekLabelPlaceholder": "e.g. Week 17 Oct",
-    "englishList": "English words (one per line)",
-    "spanishList": "Spanish words (one per line)",
-    "saveWeek": "Save week",
-    "shareWeek": "Copy share link",
-    "shareCopied": "Link copied!",
-    "replaceProgress": "Also reset streaks and green (mastered) words?\n\nWhen the week name changes, dictation mistakes are cleared automatically. Your daily mission streak is kept.",
-    "wordCount": "{{count}} words",
-    "emptyLists": "Add at least one word in English or Spanish.",
-    "savedOk": "Saved successfully! «{{label}}»: {{en}} English and {{es}} Spanish words (extra spaces trimmed).",
-    "importTitle": "Import shared week",
-    "importApply": "Import list",
-    "importInvalid": "Invalid or wrong class link"
-  },
   "childName": {
     "welcomeTitle": "What's your name?",
     "welcomeHint": "We save it on this device to personalise the app. You can change it in Settings.",
@@ -207,20 +173,5 @@
     "paperDictationTitle": "Paper dictation",
     "paperDictationHint": "By default, words follow the list order. Turn shuffle on to mix them.",
     "paperShuffleEnable": "Shuffle words (paper dictation)"
-  },
-  "editor": {
-    "title": "List editor",
-    "unlockedBanner": "Editor enabled on this device — tap to add words",
-    "hint": "Save lists here, then copy the share link for the class WhatsApp.",
-    "bookmarkTitle": "Your private editor link",
-    "bookmarkHint": "Bookmark this on your phone. Do not post it in the class chat."
-  },
-  "import": {
-    "title": "Import week",
-    "confirm": "Import \"{{label}}\"?",
-    "english": "{{count}} English words",
-    "spanish": "{{count}} Spanish words",
-    "yes": "Yes, import",
-    "no": "Not now"
   }
 }

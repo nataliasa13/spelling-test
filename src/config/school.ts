@@ -6,8 +6,8 @@ export const schoolConfig = {
   className: 'David Attenborough',
   classId: 'st-patricks-y2-attenborough',
   tagline: 'Achieving Excellence Together',
-  logoSrc: '/st-patricks-logo.png',
-  owlSrc: '/patrick-owl.png',
-  faviconSrc: '/favicon-stpatrick.jpg',
+  logoSrc: `${import.meta.env.BASE_URL}st-patricks-logo.png`,
+  owlSrc: `${import.meta.env.BASE_URL}patrick-owl.png`,
+  faviconSrc: `${import.meta.env.BASE_URL}favicon-stpatrick.jpg`,
   websiteUrl: 'https://stpatricksinternationalschool.com/',
 } as const

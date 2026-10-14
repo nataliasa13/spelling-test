@@ -51,5 +51,7 @@ function offlinePiperAssets(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // En GitHub Pages el sitio cuelga de /<repo>/; el workflow define BASE_PATH.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react(), offlinePiperAssets()],
 })

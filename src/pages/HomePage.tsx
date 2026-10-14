@@ -13,8 +13,7 @@ import type { SpellingLang } from '../types'
 
 export function HomePage() {
   const { t } = useTranslation()
-  const { week, progress, pendingImport, practiceLang, setPracticeLang } =
-    useAppState()
+  const { week, progress, practiceLang, setPracticeLang } = useAppState()
 
   function pickLang(lang: SpellingLang) {
     setPracticeLang(lang)
@@ -37,12 +36,6 @@ export function HomePage() {
     <main
       className={`page home-page ${practiceLang ? `home-page--${practiceLang}` : ''}`}
     >
-      {pendingImport && (
-        <Link to="/import" className="banner banner--accent">
-          {t('home.importBanner')}
-        </Link>
-      )}
-
       {!week ? (
         <section className="card">
           <h2>{t('home.noWeekTitle')}</h2>

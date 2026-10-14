@@ -3,7 +3,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -26,17 +25,12 @@ import {
   saveProgress,
   saveWeek,
 } from '../lib/storage'
-import {
-  clearImportParam,
-  isSameWeekContent,
-  readPackFromUrl,
-} from '../lib/sharePack'
+import { isSameWeekContent } from '../lib/weekContent'
 import { invalidatePiperOnLangChange } from '../lib/speech'
 
 type AppState = {
   week: WeekPack | null
   progress: AppProgress
-  pendingImport: WeekPack | null
   practiceLang: SpellingLang | null
   childName: string | null
   setWeek: (pack: WeekPack, resetStars: boolean) => void
@@ -44,8 +38,6 @@ type AppState = {
   setPracticeLang: (lang: SpellingLang | null) => void
   setChildName: (name: string) => void
   refresh: () => void
-  dismissImport: () => void
-  applyPendingImport: (resetStars: boolean) => void
 }
 
 const Ctx = createContext<AppState | null>(null)
@@ -53,9 +45,6 @@ const Ctx = createContext<AppState | null>(null)
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [week, setWeekState] = useState<WeekPack | null>(() => loadWeek())
   const [progress, setProgressState] = useState<AppProgress>(() => loadProgress())
-  const [pendingImport, setPendingImport] = useState<WeekPack | null>(() =>
-    readPackFromUrl(),
-  )
   const [practiceLang, setPracticeLangState] = useState<SpellingLang | null>(() =>
     loadPracticeLang(),
   )
@@ -65,26 +54,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const migrated = loadProgress()
     saveProgress(migrated)
     setProgressState(migrated)
-  }, [])
-
-  useEffect(() => {
-    if (loadWeek()) return
-    if (readPackFromUrl()) return
-    void (async () => {
-      try {
-        const res = await fetch('/week.json')
-        if (!res.ok) return
-        const pack = (await res.json()) as WeekPack
-        if (pack.classId !== schoolConfig.classId) return
-        if (!Array.isArray(pack.english) || !Array.isArray(pack.spanish)) return
-        if (getLanguagesWithWords(pack).length === 0) return
-        if (loadWeek()) return
-        saveWeek(pack)
-        setWeekState(pack)
-      } catch {
-        /* sin week embebida */
-      }
-    })()
   }, [])
 
   const refresh = useCallback(() => {
@@ -108,21 +77,37 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setProgressState(loadProgress())
   }, [])
 
-  useLayoutEffect(() => {
-    if (!pendingImport) return
-    const current = loadWeek()
-    if (current && isSameWeekContent(current, pendingImport)) {
-      setPendingImport(null)
-      clearImportParam()
-      if (current.weekLabel.trim() !== pendingImport.weekLabel.trim()) {
-        setWeek(pendingImport, false)
+  /** week.json publicado (GitHub Pages) manda si es más reciente que la semana local. */
+  useEffect(() => {
+    const syncPublishedWeek = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}week.json`, { cache: 'no-cache' })
+        if (!res.ok) return
+        const pack = (await res.json()) as WeekPack
+        if (pack.classId !== schoolConfig.classId) return
+        if (!Array.isArray(pack.english) || !Array.isArray(pack.spanish)) return
+        if (getLanguagesWithWords(pack).length === 0) return
+        const published = Date.parse(pack.publishedAt)
+        if (Number.isNaN(published)) return
+
+        const current = loadWeek()
+        if (current && Date.parse(current.publishedAt) >= published) return
+        if (current && isSameWeekContent(current, pack)) {
+          setWeek(pack, false)
+          return
+        }
+        setWeek(pack, true)
+      } catch {
+        /* offline: se queda la semana guardada */
       }
-      return
     }
-    setWeek(pendingImport, true)
-    setPendingImport(null)
-    clearImportParam()
-  }, [pendingImport, setWeek])
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void syncPublishedWeek()
+    }
+    void syncPublishedWeek()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [setWeek])
 
   const setProgress = useCallback((p: AppProgress) => {
     saveProgress(p)
@@ -146,26 +131,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (resolved && resolved !== practiceLang) setPracticeLang(resolved)
   }, [week, practiceLang, setPracticeLang])
 
-  const dismissImport = useCallback(() => {
-    setPendingImport(null)
-    clearImportParam()
-  }, [])
-
-  const applyPendingImport = useCallback(
-    (resetStars: boolean) => {
-      if (!pendingImport) return
-      setWeek(pendingImport, resetStars)
-      setPendingImport(null)
-      clearImportParam()
-    },
-    [pendingImport, setWeek],
-  )
-
   const value = useMemo(
     () => ({
       week,
       progress,
-      pendingImport,
       practiceLang,
       childName,
       setWeek,
@@ -173,13 +142,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setPracticeLang,
       setChildName,
       refresh,
-      dismissImport,
-      applyPendingImport,
     }),
     [
       week,
       progress,
-      pendingImport,
       practiceLang,
       childName,
       setWeek,
@@ -187,8 +153,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setPracticeLang,
       setChildName,
       refresh,
-      dismissImport,
-      applyPendingImport,
     ],
   )
 

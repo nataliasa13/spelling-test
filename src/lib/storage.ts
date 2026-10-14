@@ -5,7 +5,6 @@ import type { AppProgress, SpellingLang, WeekPack } from '../types'
 const KEYS = {
   week: 'spellings_week',
   progress: 'spellings_progress',
-  pin: 'spellings_pin',
   uiLang: 'spellings_ui_lang',
   practiceLang: 'spellings_practice_lang',
   childName: 'spellings_child_name',
@@ -53,14 +52,6 @@ export function saveProgress(progress: AppProgress): void {
 
 export function resetProgressForNewWeek(): void {
   saveProgress(defaultProgress())
-}
-
-export function getPin(): string | null {
-  return localStorage.getItem(KEYS.pin)
-}
-
-export function setPin(pin: string): void {
-  localStorage.setItem(KEYS.pin, pin)
 }
 
 export function getUiLang(): 'en' | 'es' | null {

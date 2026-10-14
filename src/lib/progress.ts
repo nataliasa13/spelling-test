@@ -1,5 +1,5 @@
 import type { AppProgress, PracticeMode, SpellingLang, WeekPack, WordProgress } from '../types'
-import { weekContentFingerprint } from './sharePack'
+import { weekContentFingerprint } from './weekContent'
 import { normalizeAnswer } from './words'
 
 function bucket(lang: SpellingLang): 'english' | 'spanish' {
