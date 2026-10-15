@@ -194,6 +194,19 @@
     "liveLettersEnable": "Activar colores al escribir",
     "paperDictationTitle": "Dictado en papel",
     "paperDictationHint": "Por defecto, las palabras van en el mismo orden que la lista. Activa mezclar para barajarlas.",
-    "paperShuffleEnable": "Mezclar palabras (dictado en papel)"
+    "paperShuffleEnable": "Mezclar palabras (dictado en papel)",
+    "practiceVoiceTitle": "Voz al practicar",
+    "practiceVoiceHint": "Por defecto Piper (offline, igual en todos los dispositivos). También puedes usar una voz instalada en este móvil o tablet.",
+    "practiceVoiceHintApple": "En iPhone e iPad la práctica usa la voz del sistema. Elige abajo la voz para cada idioma. Si no oyes nada, desactiva el interruptor de silencio del lateral (o sube el volumen de multimedia).",
+    "voiceAppleNote": "Voz del sistema (iPhone e iPad). Piper no está disponible aquí; la voz sigue el interruptor de silencio del dispositivo.",
+    "voicePiper": "Piper",
+    "voicePiperDetailEnglish": "Jenny — offline",
+    "voicePiperDetailSpanish": "Sharvard — offline",
+    "voiceDevice": "Dispositivo",
+    "voiceDeviceDetail": "Voz del sistema",
+    "voiceDevicePick": "Elegir voz",
+    "voiceDeviceEmpty": "No hay voces disponibles. Prueba en otro navegador o vuelve a Piper.",
+    "voiceNetwork": "en red",
+    "voicePreview": "Probar"
   }
 }

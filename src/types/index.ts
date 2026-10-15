@@ -2,6 +2,9 @@ import { appConfig } from '../config/app'
 
 export type SpellingLang = 'english' | 'spanish'
 
+/** Voz para practicar: Piper offline o speechSynthesis del dispositivo. */
+export type SpeechEngine = 'piper' | 'device'
+
 export type WeekPack = {
   classId: typeof appConfig.classId
   weekLabel: string

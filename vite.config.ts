@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
@@ -60,11 +61,22 @@ function offlinePiperAssets(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  // En GitHub Pages el sitio cuelga de /<repo>/; el workflow define BASE_PATH.
-  base: process.env.BASE_PATH ?? '/',
-  define: {
-    __APP_BUILD_ID__: JSON.stringify(readBuildId()),
-  },
-  plugins: [react(), offlinePiperAssets()],
+export default defineConfig(({ mode }) => {
+  /** `npm run dev:phone` — iPhone en la LAN necesita HTTPS (contexto seguro). */
+  const phoneDev = mode === 'phone'
+
+  return {
+    // En GitHub Pages el sitio cuelga de /<repo>/; el workflow define BASE_PATH.
+    base: process.env.BASE_PATH ?? '/',
+    define: {
+      __APP_BUILD_ID__: JSON.stringify(readBuildId()),
+    },
+    plugins: [react(), offlinePiperAssets(), ...(phoneDev ? [basicSsl()] : [])],
+    server: phoneDev
+      ? {
+          host: true,
+          https: {},
+        }
+      : undefined,
+  }
 })

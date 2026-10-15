@@ -48,11 +48,6 @@ export function AppHeader() {
                 ←
               </Link>
             ))}
-          <Link to="/" className="app-header__logo" aria-label={t('nav.home')}>
-            <span className="app-header__logo-mark" aria-hidden>
-              ✏️
-            </span>
-          </Link>
         </div>
 
         <div className="app-header__center">

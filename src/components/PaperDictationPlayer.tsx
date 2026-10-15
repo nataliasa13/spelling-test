@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LangFlag } from './LangFlag'
 import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
@@ -39,11 +39,6 @@ export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
   const langLabel = t(lang === 'english' ? 'words.english' : 'words.spanish')
   const setupCta = useVoiceLoadingLabel(loading, t('practice.paperStart'))
 
-  useEffect(() => {
-    if (phase !== 'active' || !current) return
-    void speakWord(current, lang, { preferPiper: true })
-  }, [phase, index, current, lang, runId])
-
   function setShufflePref(on: boolean) {
     setShuffle(on)
     savePaperDictationShuffle(on)
@@ -51,13 +46,14 @@ export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
 
   function onStart() {
     unlockAudio()
+    const first = words[0]
     setLoading(true)
     void (async () => {
       try {
         await ensureSpeechReady(lang)
-        unlockAudio()
         setIndex(0)
         setPhase('active')
+        if (first) void speakWord(first, lang, { preferPiper: true })
       } finally {
         setLoading(false)
       }
@@ -69,7 +65,11 @@ export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
       setPhase('done')
       return
     }
-    setIndex((i) => i + 1)
+    unlockAudio()
+    const nextIndex = index + 1
+    setIndex(nextIndex)
+    const next = words[nextIndex]
+    if (next) void speakWord(next, lang, { preferPiper: true })
   }
 
   function playAgain() {

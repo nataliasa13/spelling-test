@@ -194,6 +194,19 @@
     "liveLettersEnable": "Turn on colours while typing",
     "paperDictationTitle": "Paper dictation",
     "paperDictationHint": "By default, words follow the list order. Turn shuffle on to mix them.",
-    "paperShuffleEnable": "Shuffle words (paper dictation)"
+    "paperShuffleEnable": "Shuffle words (paper dictation)",
+    "practiceVoiceTitle": "Practice voice",
+    "practiceVoiceHint": "Piper is the default (offline, same on every device). You can also use a voice installed on this phone or tablet.",
+    "practiceVoiceHintApple": "On iPhone and iPad, practice uses the system voice. Pick a voice below for each language. If you hear nothing, turn off the side silent switch (or turn up media volume).",
+    "voiceAppleNote": "System voice (iPhone and iPad). Piper is not available here; audio follows the device silent switch.",
+    "voicePiper": "Piper",
+    "voicePiperDetailEnglish": "Jenny — offline",
+    "voicePiperDetailSpanish": "Sharvard — offline",
+    "voiceDevice": "Device",
+    "voiceDeviceDetail": "System voice",
+    "voiceDevicePick": "Choose voice",
+    "voiceDeviceEmpty": "No voices available. Try another browser or switch back to Piper.",
+    "voiceNetwork": "network",
+    "voicePreview": "Preview"
   }
 }

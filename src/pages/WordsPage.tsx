@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { SpellingLangSwitcher } from '../components/SpellingLangSwitcher'
 import { getLanguageDef, getWordsForLang } from '../config/languages'
 import { useAppState } from '../context/AppState'
@@ -69,14 +69,14 @@ export function WordsPage() {
       <h2 className="page-title">
         {t(showMistakes ? 'home.errorsTitle' : 'words.title')} — {t(def.labelKey)}
       </h2>
-      {!showMistakes && (
+      {/* {!showMistakes && (
         <p className="words-page__paper-row">
           <Link to="/practice/paper" className="btn btn--primary">
             {t('words.paperDictation')}
           </Link>
           <span className="muted words-page__paper-hint">{t('words.paperDictationHint')}</span>
         </p>
-      )}
+      )} */}
       {showMistakes ? (
         <FrequentMistakesPanel mistakes={mistakes} />
       ) : (

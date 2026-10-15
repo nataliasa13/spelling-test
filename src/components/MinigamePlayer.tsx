@@ -4,7 +4,7 @@ import type { WarmupRound } from '../lib/minigames'
 import type { SpellingLang } from '../types'
 import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
 import { SectionListenGate } from './SectionListenGate'
-import { speakWord } from '../lib/speech'
+import { speakWord, unlockAudio } from '../lib/speech'
 
 export type MinigameVariant = 'warmup' | 'free'
 
@@ -38,6 +38,7 @@ export function MinigamePlayer({
       onComplete()
       return
     }
+    unlockAudio()
     const nextIndex = index + 1
     const nextWord = rounds[nextIndex]?.word
     setIndex(nextIndex)

@@ -1,8 +1,16 @@
 import {
+  deviceSpeechBcp47,
+  isAppleTouchWebKit,
+  primeAppleDeviceSpeech,
+  resolveSpeechVoice,
+  waitForSpeechVoices,
+} from './deviceSpeech'
+import {
   installPiperLocalFetch,
   piperWasmPaths,
   resetPiperSingleton,
 } from './piperLocal'
+import { loadDeviceVoiceUri, loadSpeechEngine } from './storage'
 import type { SpellingLang } from '../types'
 
 /** Misma voz Piper en todos los dispositivos (offline). */
@@ -102,8 +110,14 @@ function piperLangKey(lang: SpellingLang): PiperLangKey {
   return lang === 'english' ? 'english' : 'spanish'
 }
 
+function piperPlatformSupported(): boolean {
+  return !isAppleTouchWebKit()
+}
+
 function shouldUsePiper(lang: SpellingLang, preferPiper: boolean): boolean {
   if (!preferPiper) return false
+  if (!piperPlatformSupported()) return false
+  if (loadSpeechEngine(lang) === 'device') return false
   return !piperUnavailable.has(piperLangKey(lang))
 }
 
@@ -123,14 +137,24 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): P
 
 async function speakWithDeviceVoice(text: string, lang: SpellingLang): Promise<void> {
   if (!('speechSynthesis' in window)) return
-  await ensureAudioContext()
   stopPlayback()
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.getVoices()
+  const synth = window.speechSynthesis
+  synth.cancel()
+  if (synth.paused) synth.resume()
+  const voices = await waitForSpeechVoices()
+  const voice = resolveSpeechVoice(voices, lang, loadDeviceVoiceUri(lang))
   const u = new SpeechSynthesisUtterance(text)
-  u.lang = lang === 'english' ? 'en-GB' : 'es-ES'
+  u.lang = voice?.lang ?? deviceSpeechBcp47(lang)
+  if (voice) u.voice = voice
   u.rate = 0.82
-  window.speechSynthesis.speak(u)
+  await new Promise<void>((resolve) => {
+    u.onend = () => resolve()
+    u.onerror = () => resolve()
+    synth.speak(u)
+    if (!synth.speaking && isAppleTouchWebKit()) {
+      window.setTimeout(() => resolve(), 120)
+    }
+  })
 }
 
 installPiperLocalFetch()
@@ -149,11 +173,12 @@ async function ensureAudioContext(): Promise<AudioContext | null> {
 }
 
 export function unlockAudio(): void {
+  primeAppleDeviceSpeech()
   void ensureAudioContext()
 }
 
 export function preloadSpanishWeekWords(_words: string[]): void {
-  void ensureSpeechReady('spanish')
+  if (loadSpeechEngine('spanish') === 'piper') void ensureSpeechReady('spanish')
 }
 
 async function loadPiper(): Promise<PiperModule> {
@@ -321,6 +346,10 @@ function ensurePiperReady(key: PiperLangKey): Promise<void> {
 export async function ensureSpeechReady(lang?: SpellingLang): Promise<boolean> {
   const key: PiperLangKey =
     lang === 'spanish' ? 'spanish' : lang === 'english' ? 'english' : 'english'
+
+  if (lang && loadSpeechEngine(lang) === 'device') return true
+
+  if (!piperPlatformSupported()) return true
 
   if (piperUnavailable.has(key)) return false
 

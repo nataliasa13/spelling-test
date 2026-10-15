@@ -126,29 +126,6 @@ a {
   text-decoration: none;
 }
 
-.app-header__logo {
-  display: block;
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-.app-header__logo-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.app-header__logo-full {
-  display: none;
-  height: 40px;
-  width: auto;
-  max-width: min(200px, 28vw);
-}
-
 .app-header__menu-wrap {
   position: relative;
   flex-shrink: 0;
@@ -545,8 +522,6 @@ button.lang-picker__option:not(.lang-picker__option--active):hover {
 
 .settings-page {
   width: 100%;
-  max-width: 26rem;
-  margin: 0 auto;
   padding-top: 2px;
   padding-bottom: 8px;
 }
@@ -721,6 +696,136 @@ button.lang-picker__option:not(.lang-picker__option--active):hover {
   font-size: 0.75rem;
   font-weight: 800;
   opacity: 0.85;
+}
+
+.settings-voice {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.settings-voice__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgb(95 135 137 / 18%);
+  background: rgb(248 250 249 / 90%);
+}
+
+.settings-voice__panel--english {
+  border-top: 3px solid rgb(123 176 231 / 55%);
+}
+
+.settings-voice__panel--spanish {
+  border-top: 3px solid rgb(237 174 68 / 55%);
+}
+
+.settings-voice__panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.settings-voice__panel-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.settings-voice__flag {
+  flex-shrink: 0;
+}
+
+.settings-voice__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.settings-voice__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 4.25rem;
+  padding: 10px 8px;
+  margin: 0;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 2px solid rgb(95 135 137 / 22%);
+  background: #fff;
+  color: var(--text);
+  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.settings-voice__choice:hover {
+  border-color: rgb(95 135 137 / 38%);
+}
+
+.settings-voice__choice--active {
+  border-color: rgb(131 168 70 / 55%);
+  background: rgb(131 168 70 / 10%);
+  box-shadow: 0 0 0 1px rgb(131 168 70 / 12%);
+}
+
+.settings-voice__choice-main {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.settings-voice__choice-sub {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+.settings-voice__device {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-voice__device .settings-form__label {
+  margin-bottom: 0;
+}
+
+.settings-voice__select {
+  width: 100%;
+}
+
+.settings-voice__preview {
+  align-self: stretch;
+  width: 100%;
+}
+
+.settings-voice__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.settings-voice__platform {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .settings-about {
@@ -1880,10 +1985,6 @@ button.activity-choice:not(:disabled):active {
     width: auto;
   }
 
-  .settings-page {
-    max-width: 32rem;
-  }
-
   .settings-form__row {
     flex-direction: row;
     align-items: flex-end;
@@ -1939,18 +2040,7 @@ button.activity-choice:not(:disabled):active {
     font-size: clamp(2.25rem, 5vw, 3rem);
   }
 
-  .app-header__logo-mark {
-    display: none;
-  }
-
-  .app-header__logo-full {
-    display: block;
-    height: 44px;
-    max-width: min(220px, 32vw);
-  }
-
   .settings-page {
-    max-width: 44rem;
     padding-top: 8px;
     padding-bottom: 16px;
   }
@@ -1966,8 +2056,28 @@ button.activity-choice:not(:disabled):active {
     align-items: stretch;
   }
 
+  .settings-page__grid > .settings-block,
+  .settings-page__grid > .settings-about {
+    min-width: 0;
+  }
+
   .settings-page__about {
     grid-column: 1 / -1;
+  }
+
+  .settings-block--wide {
+    grid-column: 1 / -1;
+  }
+
+  .settings-voice {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .settings-voice__panel {
+    min-width: 0;
+    height: 100%;
   }
 
   .settings-block {
@@ -1980,12 +2090,12 @@ button.activity-choice:not(:disabled):active {
     margin-bottom: 16px;
   }
 
-  .settings-lang {
+  .settings-lang--app {
     flex: 1;
     align-content: start;
   }
 
-  .settings-lang__option {
+  .settings-lang--app .settings-lang__option {
     flex-direction: row;
     justify-content: center;
     gap: 8px;
@@ -2011,15 +2121,6 @@ button.activity-choice:not(:disabled):active {
 }
 
 @media (min-width: 900px) {
-  .app-header__logo-full {
-    height: 48px;
-    max-width: 280px;
-  }
-
-  .settings-page {
-    max-width: 52rem;
-  }
-
   .settings-page__intro {
     text-align: center;
     max-width: 34rem;
@@ -2032,7 +2133,6 @@ button.activity-choice:not(:disabled):active {
   }
 
   .settings-page__grid {
-    grid-template-columns: 1.15fr 0.85fr;
     gap: 20px;
   }
 
@@ -2042,16 +2142,16 @@ button.activity-choice:not(:disabled):active {
     font-size: 1.35rem;
   }
 
-  .settings-lang__option {
+  .settings-lang--app .settings-lang__option {
     min-height: 72px;
     padding: 14px 16px;
   }
 
-  .settings-lang .lang-flag {
+  .settings-lang--app .lang-flag {
     width: 32px;
   }
 
-  .settings-lang__label {
+  .settings-lang--app .settings-lang__label {
     font-size: 0.9375rem;
   }
 

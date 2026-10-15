@@ -11,6 +11,8 @@ import {
   setUiLang,
 } from '../lib/storage'
 import { LangFlag } from '../components/LangFlag'
+import { SettingsPracticeVoice } from '../components/SettingsPracticeVoice'
+import { isAppleTouchWebKit } from '../lib/deviceSpeech'
 
 export function SettingsPage() {
   const { t, i18n: i18nInstance } = useTranslation()
@@ -129,7 +131,7 @@ export function SettingsPage() {
         </div>
         <div
           id={langGroupId}
-          className="settings-lang"
+          className="settings-lang settings-lang--app"
           role="radiogroup"
           aria-labelledby="settings-lang-heading"
         >
@@ -163,6 +165,29 @@ export function SettingsPage() {
               </span>
             )}
           </button>
+        </div>
+      </section>
+
+      <section
+        className="settings-block settings-block--wide"
+        aria-labelledby="settings-voice-heading"
+      >
+        <div className="settings-block__head">
+          <span className="settings-block__icon" aria-hidden>
+            🔊
+          </span>
+          <div className="settings-block__head-text">
+            <h3 id="settings-voice-heading" className="settings-block__title">
+              {t('settings.practiceVoiceTitle')}
+            </h3>
+            <p className="settings-block__hint muted">
+              {t(isAppleTouchWebKit() ? 'settings.practiceVoiceHintApple' : 'settings.practiceVoiceHint')}
+            </p>
+          </div>
+        </div>
+        <div className="settings-voice">
+          <SettingsPracticeVoice practiceLang="english" />
+          <SettingsPracticeVoice practiceLang="spanish" />
         </div>
       </section>
 

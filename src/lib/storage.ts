@@ -1,6 +1,6 @@
 import { isValidChildName, normalizeChildName } from './childName'
 import { migrateProgressWrongVariants } from './progress'
-import type { AppProgress, SpellingLang, WeekPack } from '../types'
+import type { AppProgress, SpeechEngine, SpellingLang, WeekPack } from '../types'
 
 const KEYS = {
   week: 'spellings_week',
@@ -10,7 +10,19 @@ const KEYS = {
   childName: 'spellings_child_name',
   liveLetters: 'spellings_live_letters',
   paperDictationShuffle: 'spellings_paper_dictation_shuffle',
+  speechEngineEnglish: 'spellings_speech_engine_english',
+  speechEngineSpanish: 'spellings_speech_engine_spanish',
+  deviceVoiceEnglish: 'spellings_device_voice_english',
+  deviceVoiceSpanish: 'spellings_device_voice_spanish',
 } as const
+
+function speechEngineKey(lang: SpellingLang): string {
+  return lang === 'english' ? KEYS.speechEngineEnglish : KEYS.speechEngineSpanish
+}
+
+function deviceVoiceKey(lang: SpellingLang): string {
+  return lang === 'english' ? KEYS.deviceVoiceEnglish : KEYS.deviceVoiceSpanish
+}
 
 const defaultProgress = (): AppProgress => ({
   english: {},
@@ -100,6 +112,27 @@ export function loadPaperDictationShuffle(): boolean {
 export function savePaperDictationShuffle(shuffle: boolean): void {
   if (shuffle) localStorage.setItem(KEYS.paperDictationShuffle, '1')
   else localStorage.removeItem(KEYS.paperDictationShuffle)
+}
+
+/** Predeterminado: Piper (offline). */
+export function loadSpeechEngine(lang: SpellingLang): SpeechEngine {
+  const v = localStorage.getItem(speechEngineKey(lang))
+  return v === 'device' ? 'device' : 'piper'
+}
+
+export function saveSpeechEngine(lang: SpellingLang, engine: SpeechEngine): void {
+  if (engine === 'piper') localStorage.removeItem(speechEngineKey(lang))
+  else localStorage.setItem(speechEngineKey(lang), 'device')
+}
+
+export function loadDeviceVoiceUri(lang: SpellingLang): string | null {
+  const v = localStorage.getItem(deviceVoiceKey(lang))
+  return v && v.length > 0 ? v : null
+}
+
+export function saveDeviceVoiceUri(lang: SpellingLang, voiceUri: string | null): void {
+  if (voiceUri) localStorage.setItem(deviceVoiceKey(lang), voiceUri)
+  else localStorage.removeItem(deviceVoiceKey(lang))
 }
 
 export function saveChildName(raw: string): void {
