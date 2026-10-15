@@ -9,7 +9,7 @@ import {
 } from 'react'
 import type { AppProgress, SpellingLang, WeekPack } from '../types'
 import { getLanguagesWithWords, resolvePracticeLangForWeek } from '../config/languages'
-import { schoolConfig } from '../config/school'
+import { appConfig } from '../config/app'
 import {
   isNewSpellingWeek,
   reconcileProgressForWeek,
@@ -84,7 +84,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         const res = await fetch(`${import.meta.env.BASE_URL}week.json`, { cache: 'no-cache' })
         if (!res.ok) return
         const pack = (await res.json()) as WeekPack
-        if (pack.classId !== schoolConfig.classId) return
+        if (pack.classId !== appConfig.classId) return
         if (!Array.isArray(pack.english) || !Array.isArray(pack.spanish)) return
         if (getLanguagesWithWords(pack).length === 0) return
         const published = Date.parse(pack.publishedAt)

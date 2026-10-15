@@ -1,9 +1,9 @@
-import { schoolConfig } from '../config/school'
+import { appConfig } from '../config/app'
 
 export type SpellingLang = 'english' | 'spanish'
 
 export type WeekPack = {
-  classId: typeof schoolConfig.classId
+  classId: typeof appConfig.classId
   weekLabel: string
   english: string[]
   spanish: string[]
@@ -30,4 +30,11 @@ export type AppProgress = {
   missionStreak: number
 }
 
-export type PracticeMode = 'mission' | 'free' | 'challenge' | 'mistakes' | 'paper'
+export type PracticeMode =
+  | 'mission'
+  | 'free'
+  | 'challenge'
+  | 'mistakes'
+  | 'paper'
+  | 'dictation'
+  | 'minigames'

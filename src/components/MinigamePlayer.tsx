@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WarmupRound } from '../lib/minigames'
 import type { SpellingLang } from '../types'
-import { ListenAgainButton } from './ListenAgainButton'
+import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
 import { SectionListenGate } from './SectionListenGate'
 import { speakWord } from '../lib/speech'
 
@@ -13,13 +13,21 @@ type Props = {
   rounds: WarmupRound[]
   lang: SpellingLang
   onComplete: () => void
+  /** Misión: el sonido ya se activó en la pantalla única de empezar. */
+  skipInitialGate?: boolean
 }
 
-export function MinigamePlayer({ variant, rounds, lang, onComplete }: Props) {
+export function MinigamePlayer({
+  variant,
+  rounds,
+  lang,
+  onComplete,
+  skipInitialGate = false,
+}: Props) {
   const { t } = useTranslation()
   const [index, setIndex] = useState(0)
   const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>('idle')
-  const [started, setStarted] = useState(false)
+  const [started, setStarted] = useState(skipInitialGate)
   const round = rounds[index]
 
   if (!round) return null
@@ -74,8 +82,19 @@ export function MinigamePlayer({ variant, rounds, lang, onComplete }: Props) {
           onNext={goNext}
           onRetry={() => setFeedback('idle')}
         />
-      ) : (
+      ) : round.kind === 'scramble' ? (
         <ScrambleRound
+          round={round}
+          lang={lang}
+          feedback={feedback}
+          onAnswer={(ok) => {
+            setFeedback(ok ? 'ok' : 'bad')
+          }}
+          onNext={goNext}
+          onRetry={() => setFeedback('idle')}
+        />
+      ) : (
+        <MatchRound
           round={round}
           lang={lang}
           feedback={feedback}
@@ -156,6 +175,54 @@ function BlankRound({
               type="button"
               className="btn warmup-option"
               onClick={() => onAnswer(opt === round.word[round.hiddenIndex])}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+      <FeedbackBlock
+        feedback={feedback}
+        word={round.word}
+        onNext={onNext}
+        onRetry={onRetry}
+      />
+    </div>
+  )
+}
+
+function MatchRound({
+  round,
+  lang,
+  feedback,
+  onAnswer,
+  onNext,
+  onRetry,
+}: {
+  round: Extract<WarmupRound, { kind: 'match' }>
+  lang: SpellingLang
+  feedback: 'idle' | 'ok' | 'bad'
+  onAnswer: (ok: boolean) => void
+  onNext: () => void
+  onRetry: () => void
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="practice-card practice-card--minigame">
+      <p className="warmup-prompt">{t('practice.warmupMatchPrompt')}</p>
+      <p className="practice-prompt" aria-hidden>
+        <ListenIcon size="lg" />
+      </p>
+      <ListenAgainButton word={round.word} lang={lang} className="listen-again-btn--minigame" />
+      {feedback !== 'ok' && (
+        <div className="warmup-options">
+          {round.options.map((opt, i) => (
+            <button
+              key={`${opt}-${i}`}
+              type="button"
+              className="btn warmup-option warmup-option--phrase"
+              onClick={() => onAnswer(opt === round.word)}
             >
               {opt}
             </button>

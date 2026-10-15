@@ -11,7 +11,6 @@ import {
   setUiLang,
 } from '../lib/storage'
 import { LangFlag } from '../components/LangFlag'
-import { schoolConfig } from '../config/school'
 
 export function SettingsPage() {
   const { t, i18n: i18nInstance } = useTranslation()
@@ -224,19 +223,12 @@ export function SettingsPage() {
         aria-label={t('settings.about')}
       >
         <div className="settings-about__brand">
-          <img
-            className="settings-about__logo"
-            src={schoolConfig.faviconSrc}
-            alt=""
-            width={56}
-            height={56}
-            decoding="async"
-          />
+          <span className="settings-about__logo" aria-hidden>
+            ✏️
+          </span>
           <div className="settings-about__text">
-            <p className="settings-about__school">{schoolConfig.schoolName}</p>
-            <p className="settings-about__product muted">
-              {schoolConfig.productName} · {schoolConfig.yearGroup} {schoolConfig.className}
-            </p>
+            <p className="settings-about__school">{t('app.product')}</p>
+            <p className="settings-about__product muted">{t('app.tagline')}</p>
           </div>
         </div>
         <p className="settings-about__disclaimer">{t('home.disclaimer')}</p>

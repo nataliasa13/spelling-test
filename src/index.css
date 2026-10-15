@@ -114,11 +114,16 @@ a {
   place-items: center;
   width: 36px;
   height: 36px;
+  padding: 0;
+  border: none;
   border-radius: 10px;
+  font: inherit;
   font-size: 1.2rem;
   line-height: 1;
   color: var(--accent);
   background: rgb(95 135 137 / 8%);
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .app-header__logo {
@@ -128,10 +133,13 @@ a {
 }
 
 .app-header__logo-mark {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  object-fit: contain;
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .app-header__logo-full {
@@ -159,47 +167,24 @@ a {
   background: rgb(95 135 137 / 10%);
   color: var(--accent);
   cursor: pointer;
+  text-decoration: none;
 }
 
-.app-header__menu-btn[aria-expanded='true'] {
+.app-header__menu-btn:hover,
+.app-header__menu-btn:focus-visible {
+  background: rgb(131 168 70 / 18%);
+  color: var(--stp-green-dark);
+  outline: none;
+}
+
+.app-header__menu-btn--active {
   background: rgb(131 168 70 / 18%);
   color: var(--stp-green-dark);
 }
 
 .app-header__menu-icon {
-  font-size: 1.35rem;
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-}
-
-.app-header__menu-panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 30;
-  min-width: 168px;
-  padding: 6px;
-  background: var(--card);
-  border: 1px solid rgb(95 135 137 / 20%);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgb(49 49 49 / 12%);
-}
-
-.app-header__menu-item {
   display: block;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.app-header__menu-item:hover,
-.app-header__menu-item:focus-visible {
-  background: rgb(131 168 70 / 12%);
-  color: var(--stp-green-dark);
-  outline: none;
+  flex-shrink: 0;
 }
 
 .page-title {
@@ -763,12 +748,16 @@ button.lang-picker__option:not(.lang-picker__option--active):hover {
 }
 
 .settings-about__logo {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 56px;
   height: 56px;
   margin: 0;
   border-radius: 12px;
-  object-fit: cover;
+  font-size: 1.75rem;
+  line-height: 1;
+  background: rgb(131 168 70 / 12%);
   box-shadow: 0 2px 8px rgb(49 49 49 / 10%);
 }
 
@@ -943,13 +932,33 @@ button.activity-choice:not(:disabled):active {
   box-shadow: 0 2px 8px rgb(131 168 70 / 25%);
 }
 
-.activity-choice--free {
+.activity-choice--mission-done {
+  border-color: rgb(131 168 70 / 55%);
+  background: linear-gradient(135deg, rgb(131 168 70 / 16%), rgb(131 168 70 / 6%));
+}
+
+.activity-choice__stat.activity-choice__done-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 1;
+  color: var(--stp-green-dark);
+  background: rgb(131 168 70 / 22%);
+  border: 1px solid rgb(131 168 70 / 35%);
+}
+
+.activity-choice--free,
+.activity-choice--dictation {
   background: linear-gradient(135deg, rgb(123 176 231 / 22%), rgb(123 176 231 / 8%));
   border-color: rgb(123 176 231 / 45%);
   color: #1a4d7a;
 }
 
-.activity-choice--free .activity-choice__icon {
+.activity-choice--free .activity-choice__icon,
+.activity-choice--dictation .activity-choice__icon {
   background: rgb(255 255 255 / 55%);
 }
 
@@ -1364,6 +1373,13 @@ button.activity-choice:not(:disabled):active {
 
 .warmup-option:disabled {
   opacity: 0.5;
+}
+
+/* Palabras completas en «escucha y elige»: mismos botones, tipografía legible */
+.practice-card--minigame .warmup-option--phrase {
+  font-size: clamp(1.125rem, 4.5vw, 1.35rem);
+  letter-spacing: 0.02em;
+  font-weight: 700;
 }
 
 .warmup-tiles {

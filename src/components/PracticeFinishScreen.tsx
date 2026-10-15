@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { schoolConfig } from '../config/school'
 import type { PracticeMode } from '../types'
 
 export type FinishKind = PracticeMode | 'minigames'
@@ -13,6 +12,8 @@ type Props = {
   missionStreak?: number
   onPlayAgain?: () => void
   playAgainLabel?: string
+  onChangeMode?: () => void
+  changeModeLabel?: string
 }
 
 function celebrationEmoji(kind: FinishKind, score: number, total: number): string {
@@ -37,6 +38,8 @@ export function PracticeFinishScreen({
   missionStreak = 0,
   onPlayAgain,
   playAgainLabel,
+  onChangeMode,
+  changeModeLabel,
 }: Props) {
   const { t } = useTranslation()
   const emoji = celebrationEmoji(kind, score, total)
@@ -65,14 +68,6 @@ export function PracticeFinishScreen({
         <p className="finish-screen__confetti" aria-hidden>
           ✨ 🎊 ✨
         </p>
-        <img
-          className="finish-screen__owl"
-          src={schoolConfig.owlSrc}
-          alt=""
-          width={120}
-          height={120}
-          decoding="async"
-        />
         <p className="finish-screen__emoji" aria-hidden>
           {emoji}
         </p>
@@ -103,6 +98,11 @@ export function PracticeFinishScreen({
           {onPlayAgain && playAgainLabel && (
             <button type="button" className="btn btn--primary" onClick={onPlayAgain}>
               {playAgainLabel}
+            </button>
+          )}
+          {onChangeMode && changeModeLabel && (
+            <button type="button" className="btn" onClick={onChangeMode}>
+              {changeModeLabel}
             </button>
           )}
           {kind === 'mistakes' ? (

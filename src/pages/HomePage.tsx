@@ -4,10 +4,9 @@ import { SpellingLangSwitcher } from '../components/SpellingLangSwitcher'
 import { getWordsForLang } from '../config/languages'
 import { useAppState } from '../context/AppState'
 import {
-  challengeThreshold,
-  challengeUnlocked,
   countMastered,
   countWordsWithMistakes,
+  isMissionCompleteToday,
 } from '../lib/progress'
 import type { SpellingLang } from '../types'
 
@@ -22,15 +21,12 @@ export function HomePage() {
   const langList =
     practiceLang && week ? getWordsForLang(week, practiceLang) : []
 
-  const langUnlocked = practiceLang && week
-    ? challengeUnlocked(progress, practiceLang, langList)
-    : false
-  const dareNeed = practiceLang && week ? challengeThreshold(langList.length) : 0
   const masteredCount =
     practiceLang && week ? countMastered(progress, practiceLang, langList) : 0
   const wordsTotal = langList.length
   const mistakeWordCount =
     practiceLang && week ? countWordsWithMistakes(progress, practiceLang, langList) : 0
+  const missionDoneToday = isMissionCompleteToday(progress)
 
   return (
     <main
@@ -75,15 +71,29 @@ export function HomePage() {
 
             <Link
               to="/practice/mission"
-              className="activity-choice activity-choice--mission activity-choice--full"
+              className={`activity-choice activity-choice--mission activity-choice--full${missionDoneToday ? ' activity-choice--mission-done' : ''}`}
+              aria-label={
+                missionDoneToday
+                  ? t('home.missionDoneA11y')
+                  : t('home.dailyMission')
+              }
             >
               <span className="activity-choice__icon activity-choice__icon--lg" aria-hidden>
-                ⭐
+                {missionDoneToday ? '✅' : '⭐'}
               </span>
               <span className="activity-choice__body">
                 <span className="activity-choice__title">{t('home.dailyMission')}</span>
-                <span className="activity-choice__sub">{t('home.activityMissionSub')}</span>
+                <span className="activity-choice__sub">
+                  {missionDoneToday
+                    ? t('home.activityMissionDoneSub')
+                    : t('home.activityMissionSub')}
+                </span>
               </span>
+              {missionDoneToday ? (
+                <span className="activity-choice__stat activity-choice__done-badge">
+                  {t('home.missionDoneBadge')}
+                </span>
+              ) : null}
               <span className="activity-choice__go" aria-hidden>
                 →
               </span>
@@ -134,65 +144,32 @@ export function HomePage() {
             </div>
 
             <div className="activity-grid__pair">
-              <Link to="/practice/free" className="activity-choice activity-choice--free">
+              <Link to="/practice/dictation" className="activity-choice activity-choice--dictation">
                 <span className="activity-choice__icon" aria-hidden>
-                  🎮
+                  ✏️
                 </span>
                 <span className="activity-choice__body">
                   <span className="activity-choice__title">
-                    {t('home.freePlay', { count: langList.length })}
+                    {t('home.dictation', { count: langList.length })}
                   </span>
-                  <span className="activity-choice__sub">{t('home.activityFreeSub')}</span>
+                  <span className="activity-choice__sub">{t('home.activityDictationSub')}</span>
                 </span>
                 <span className="activity-choice__go" aria-hidden>
                   →
                 </span>
               </Link>
-              {langUnlocked ? (
-                <Link to="/practice/challenge" className="activity-choice activity-choice--dare">
-                  <span className="activity-choice__icon" aria-hidden>
-                    🚀
-                  </span>
-                  <span className="activity-choice__body">
-                    <span className="activity-choice__title">
-                      {t('home.dare', { count: langList.length })}
-                    </span>
-                    <span className="activity-choice__sub">{t('home.activityDareSub')}</span>
-                  </span>
-                  <span className="activity-choice__go" aria-hidden>
-                    →
-                  </span>
-                </Link>
-              ) : (
-                <div
-                  className="activity-choice activity-choice--dare activity-choice--locked"
-                  aria-disabled="true"
-                  aria-label={t('home.dareLockedA11y', {
-                    mastered: masteredCount,
-                    need: dareNeed,
-                  })}
-                >
-                  <span className="activity-choice__icon activity-choice__icon--locked" aria-hidden>
-                    🔒
-                  </span>
-                  <span className="activity-choice__body">
-                    <span className="activity-choice__title-row">
-                      <span className="activity-choice__title">
-                        {t('home.dare', { count: langList.length })}
-                      </span>
-                      <span className="activity-choice__lock-badge">
-                        {t('home.dareLockedBadge')}
-                      </span>
-                    </span>
-                    <span className="activity-choice__sub activity-choice__sub--lock">
-                      {t('home.dareLocked', { need: dareNeed })}
-                    </span>
-                  </span>
-                  <span className="activity-choice__stat activity-choice__stat--lock" aria-hidden>
-                    {masteredCount}/{dareNeed}
-                  </span>
-                </div>
-              )}
+              <Link to="/practice/minigames" className="activity-choice activity-choice--minigames">
+                <span className="activity-choice__icon" aria-hidden>
+                  🎮
+                </span>
+                <span className="activity-choice__body">
+                  <span className="activity-choice__title">{t('home.minigames')}</span>
+                  <span className="activity-choice__sub">{t('home.activityMinigamesSub')}</span>
+                </span>
+                <span className="activity-choice__go" aria-hidden>
+                  →
+                </span>
+              </Link>
             </div>
           </nav>
         </>

@@ -321,6 +321,10 @@ export function reconcileProgressForWeek(
   return next
 }
 
+export function isMissionCompleteToday(progress: AppProgress): boolean {
+  return progress.lastMissionDate === todayKey()
+}
+
 export function markMissionComplete(progress: AppProgress): AppProgress {
   const today = todayKey()
   const next = structuredClone(progress)

@@ -83,12 +83,13 @@ export function loadChildName(): string | null {
 }
 
 export function loadLiveLetterHint(): boolean {
-  return localStorage.getItem(KEYS.liveLetters) === '1'
+  const v = localStorage.getItem(KEYS.liveLetters)
+  if (v === null) return true
+  return v === '1'
 }
 
 export function saveLiveLetterHint(enabled: boolean): void {
-  if (enabled) localStorage.setItem(KEYS.liveLetters, '1')
-  else localStorage.removeItem(KEYS.liveLetters)
+  localStorage.setItem(KEYS.liveLetters, enabled ? '1' : '0')
 }
 
 /** Dictado en papel: true = mezcladas; false = orden de la lista (predeterminado). */
