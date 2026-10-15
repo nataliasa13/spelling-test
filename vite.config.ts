@@ -7,6 +7,16 @@ import { defineConfig, type Plugin } from 'vite'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const ortDist = path.join(rootDir, 'node_modules/onnxruntime-web/dist')
 
+function readBuildId(): string {
+  try {
+    const raw = fs.readFileSync(path.join(rootDir, 'public/version.json'), 'utf8')
+    const parsed = JSON.parse(raw) as { build?: string }
+    return parsed.build ?? 'dev'
+  } catch {
+    return process.env.GITHUB_SHA?.slice(0, 7) ?? 'dev'
+  }
+}
+
 /** Sirve ONNX/Piper en dev sin que Vite trate los .wasm como imports de código. */
 function offlinePiperAssets(): Plugin {
   return {
@@ -53,5 +63,8 @@ function offlinePiperAssets(): Plugin {
 export default defineConfig({
   // En GitHub Pages el sitio cuelga de /<repo>/; el workflow define BASE_PATH.
   base: process.env.BASE_PATH ?? '/',
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(readBuildId()),
+  },
   plugins: [react(), offlinePiperAssets()],
 })

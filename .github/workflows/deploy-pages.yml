@@ -30,6 +30,11 @@ jobs:
 
       - run: npm ci
 
+      - name: Build version stamp
+        run: node scripts/write-build-version.mjs
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
       - name: Build
         run: npm run build
         env:
