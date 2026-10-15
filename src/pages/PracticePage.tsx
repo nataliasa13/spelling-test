@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getWordsForLang } from '../config/languages'
@@ -6,6 +6,8 @@ import { useAppState } from '../context/AppState'
 import { usePracticeBack } from '../context/PracticeBackContext'
 import { answersMatch } from '../lib/words'
 import { ListenAgainButton, ListenIcon } from '../components/ListenAgainButton'
+import { CorrectFeedback } from '../components/CorrectFeedback'
+import { speakCorrectFeedback } from '../lib/correctFeedback'
 import { speakWord } from '../lib/speech'
 import {
   buildMistakeReviewWords,
@@ -18,7 +20,7 @@ import {
   topCommonWrongSpellings,
 } from '../lib/progress'
 import { LiveLetterFeedback } from '../components/LiveLetterFeedback'
-import { MinigamePlayer } from '../components/MinigamePlayer'
+import { MinigamePlayer, type MinigamePersistedState } from '../components/MinigamePlayer'
 import { loadLiveLetterHint } from '../lib/storage'
 import { PaperDictationPlayer } from '../components/PaperDictationPlayer'
 import { SectionListenGate } from '../components/SectionListenGate'
@@ -28,12 +30,22 @@ import {
   buildWarmupRounds,
   pickMissionWarmupWords,
   type MinigamePlayMode,
+  type WarmupRound,
 } from '../lib/minigames'
+import {
+  clearPracticeSession,
+  isSessionActivePayload,
+  loadPracticeSession,
+  matchesPracticeSessionScope,
+  savePracticeSession,
+  wordOrderMatchesWeek,
+  type DictationSessionKind,
+  type MinigameSessionPayload,
+  type TypingSessionPayload,
+} from '../lib/practiceSession'
 import type { PracticeMode, SpellingLang } from '../types'
 
-type DictationSession = 'pick' | 'practice' | 'exam'
-
-function dictationPlayMode(session: DictationSession): 'free' | 'challenge' | null {
+function dictationPlayMode(session: DictationSessionKind): 'free' | 'challenge' | null {
   if (session === 'practice') return 'free'
   if (session === 'exam') return 'challenge'
   return null
@@ -52,49 +64,171 @@ export function PracticePage() {
   const { mode: modeParam } = useParams<{ mode: string }>()
   const mode = (modeParam as PracticeMode) || 'mission'
   const { t } = useTranslation()
-  const { week, progress, setProgress, practiceLang } = useAppState()
+  const { week, progress, setProgress, practiceLang, childName } = useAppState()
   const practiceBackCtx = usePracticeBack()
 
-  const [index, setIndex] = useState(0)
-  const [input, setInput] = useState('')
-  const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>('idle')
-  const [showWord, setShowWord] = useState(false)
-  const [finished, setFinished] = useState(false)
-  const [score, setScore] = useState(0)
-  const [missionPhase, setMissionPhase] = useState<'warmup' | 'dictation'>('warmup')
-  const [dictationSession, setDictationSession] = useState<DictationSession>('pick')
-  const [minigameRun, setMinigameRun] = useState(0)
-  const [minigameSession, setMinigameSession] = useState<'pick' | 'play'>('pick')
-  const [minigamePlayMode, setMinigamePlayMode] = useState<MinigamePlayMode>('mix')
-  const [freeMinigamesDone, setFreeMinigamesDone] = useState(false)
-  const [dictationStarted, setDictationStarted] = useState(false)
-  const [missionAudioReady, setMissionAudioReady] = useState(false)
-  const mistakeWordsSessionRef = useRef<{ key: string; words: string[] } | null>(null)
-
-  useEffect(() => {
-    setDictationStarted(false)
-  }, [mode, practiceLang, missionPhase, dictationSession])
-
-  useEffect(() => {
-    return () => {
-      mistakeWordsSessionRef.current = null
+  const savedRef = useRef<
+    | {
+        typing: TypingSessionPayload | null
+        minigame: MinigameSessionPayload | null
+      }
+    | undefined
+  >(undefined)
+  if (savedRef.current === undefined) {
+    if (week && practiceLang) {
+      const s = loadPracticeSession()
+      const ok = s && matchesPracticeSessionScope(s, week, practiceLang, mode)
+      savedRef.current = {
+        typing: ok && s.payload.type === 'typing' ? s.payload : null,
+        minigame: ok && s.payload.type === 'minigame' ? s.payload : null,
+      }
+    } else {
+      savedRef.current = { typing: null, minigame: null }
     }
+  }
+  const typingSaved = savedRef.current.typing
+  const miniSaved = savedRef.current.minigame
+
+  const progressAtOpenRef = useRef(progress)
+
+  const [wordOrder, setWordOrder] = useState<string[] | null>(() => {
+    if (
+      typingSaved?.wordOrder &&
+      week &&
+      practiceLang &&
+      wordOrderMatchesWeek(typingSaved.wordOrder, week, practiceLang)
+    ) {
+      return typingSaved.wordOrder
+    }
+    return null
+  })
+  const [index, setIndex] = useState(typingSaved?.index ?? 0)
+  const [input, setInput] = useState(typingSaved?.input ?? '')
+  const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>(typingSaved?.feedback ?? 'idle')
+  const [showWord, setShowWord] = useState(false)
+  const [finished, setFinished] = useState(typingSaved?.finished ?? false)
+  const [score, setScore] = useState(typingSaved?.score ?? 0)
+  const [missionPhase, setMissionPhase] = useState<'warmup' | 'dictation'>(
+    typingSaved?.missionPhase ?? 'warmup',
+  )
+  const [dictationSession, setDictationSession] = useState<DictationSessionKind>(
+    typingSaved?.dictationSession ?? 'pick',
+  )
+  const [minigameRun, setMinigameRun] = useState(miniSaved?.minigameRun ?? 0)
+  const [minigameSession, setMinigameSession] = useState<'pick' | 'play'>(
+    miniSaved?.minigameSession ?? 'pick',
+  )
+  const [minigamePlayMode, setMinigamePlayMode] = useState<MinigamePlayMode>(
+    miniSaved?.minigamePlayMode ?? 'mix',
+  )
+  const [freeMinigamesDone, setFreeMinigamesDone] = useState(miniSaved?.freeMinigamesDone ?? false)
+  const [dictationStarted, setDictationStarted] = useState(typingSaved?.dictationStarted ?? false)
+  const [missionAudioReady, setMissionAudioReady] = useState(
+    typingSaved?.missionAudioReady ?? false,
+  )
+  const [pinnedWarmupRounds, setPinnedWarmupRounds] = useState<WarmupRound[] | null>(
+    miniSaved?.variant === 'warmup' ? miniSaved.rounds : null,
+  )
+  const [pinnedFreeRounds, setPinnedFreeRounds] = useState<WarmupRound[] | null>(
+    miniSaved?.variant === 'free' ? miniSaved.rounds : null,
+  )
+  const [minigameLive, setMinigameLive] = useState<MinigamePersistedState>(() => ({
+    index: miniSaved?.index ?? 0,
+    feedback: miniSaved?.feedback ?? 'idle',
+    started: miniSaved?.started ?? false,
+  }))
+  const handleMinigamePersist = useCallback((state: MinigamePersistedState) => {
+    setMinigameLive(state)
   }, [])
 
-  const words = useMemo(() => {
-    if (!week || !practiceLang) return []
+  const prevPracticeLangRef = useRef(practiceLang)
+  const prevDictationSessionRef = useRef(dictationSession)
+  const prevModeRef = useRef(mode)
+
+  function applyTypingRestore(payload: TypingSessionPayload) {
+    if (
+      week &&
+      practiceLang &&
+      wordOrderMatchesWeek(payload.wordOrder, week, practiceLang)
+    ) {
+      setWordOrder(payload.wordOrder)
+    } else {
+      setWordOrder(null)
+    }
+    setIndex(payload.index)
+    setInput(payload.input)
+    setFeedback(payload.feedback)
+    setScore(payload.score)
+    setFinished(payload.finished)
+    setDictationStarted(payload.dictationStarted)
+    setMissionPhase(payload.missionPhase)
+    setMissionAudioReady(payload.missionAudioReady)
+    setDictationSession(payload.dictationSession)
+    prevDictationSessionRef.current = payload.dictationSession
+  }
+
+  function applyMinigameRestore(payload: MinigameSessionPayload) {
+    setMinigameRun(payload.minigameRun)
+    setMinigameSession(payload.minigameSession)
+    setMinigamePlayMode(payload.minigamePlayMode)
+    setFreeMinigamesDone(payload.freeMinigamesDone)
+    setMinigameLive({
+      index: payload.index,
+      feedback: payload.feedback,
+      started: payload.started,
+    })
+    if (payload.variant === 'warmup') setPinnedWarmupRounds(payload.rounds)
+    if (payload.variant === 'free') setPinnedFreeRounds(payload.rounds)
+  }
+
+  useEffect(() => {
+    if (prevModeRef.current === mode) return
+    prevModeRef.current = mode
+
+    if (!week || !practiceLang) return
+    const s = loadPracticeSession()
+    if (s && matchesPracticeSessionScope(s, week, practiceLang, mode)) {
+      if (s.payload.type === 'typing') applyTypingRestore(s.payload)
+      else if (s.payload.type === 'minigame') applyMinigameRestore(s.payload)
+      return
+    }
+
+    clearPracticeSession()
+    setWordOrder(null)
+    setIndex(0)
+    setInput('')
+    setFeedback('idle')
+    setFinished(false)
+    setScore(0)
+    setShowWord(false)
+    setDictationSession('pick')
+    prevDictationSessionRef.current = 'pick'
+    setDictationStarted(false)
+    setMissionAudioReady(false)
+    setMissionPhase('warmup')
+    setMinigameSession('pick')
+    setFreeMinigamesDone(false)
+    setPinnedWarmupRounds(null)
+    setPinnedFreeRounds(null)
+    setMinigameLive({ index: 0, feedback: 'idle', started: false })
+  }, [mode, week, practiceLang])
+
+  useEffect(() => {
+    if (!week || !practiceLang || wordOrder?.length) return
     const list = getWordsForLang(week, practiceLang)
     if (mode === 'mistakes') {
-      const sessionKey = `mistakes:${practiceLang}:${week.weekLabel}`
-      const cached = mistakeWordsSessionRef.current
-      if (cached?.key === sessionKey) return cached.words
-      const built = shuffle(buildMistakeReviewWords(progress, practiceLang, list))
-      mistakeWordsSessionRef.current = { key: sessionKey, words: built }
-      return built
+      setWordOrder(
+        shuffle(buildMistakeReviewWords(progressAtOpenRef.current, practiceLang, list)),
+      )
+      return
     }
-    mistakeWordsSessionRef.current = null
-    return shuffle(list)
-  }, [week, practiceLang, mode]) // eslint-disable-line react-hooks/exhaustive-deps -- progress al abrir sesión de repaso
+    setWordOrder(shuffle(list))
+  }, [week, practiceLang, mode, wordOrder])
+
+  const words = useMemo(() => {
+    if (!wordOrder?.length) return []
+    return wordOrder
+  }, [wordOrder])
 
   const minigameRoundOptions = useMemo(() => {
     if (!practiceLang) return undefined
@@ -108,30 +242,48 @@ export function PracticePage() {
   }, [progress, practiceLang])
 
   const warmupRounds = useMemo(() => {
+    if (pinnedWarmupRounds) return pinnedWarmupRounds
     if (!week || !practiceLang || mode !== 'mission') return []
     const list = getWordsForLang(week, practiceLang)
     const candidates = pickMissionWarmupWords(list, (w) =>
       getWordProgress(progress, practiceLang, w).mastered,
     )
     return buildWarmupRounds(candidates, minigameRoundOptions)
-  }, [week, practiceLang, mode, progress, minigameRoundOptions])
+  }, [pinnedWarmupRounds, week, practiceLang, mode, progress, minigameRoundOptions])
+
+  useEffect(() => {
+    if (mode !== 'mission' || pinnedWarmupRounds) return
+    if (!week || !practiceLang) return
+    const list = getWordsForLang(week, practiceLang)
+    const candidates = pickMissionWarmupWords(list, (w) =>
+      getWordProgress(progress, practiceLang, w).mastered,
+    )
+    const built = buildWarmupRounds(candidates, minigameRoundOptions)
+    if (built.length > 0) setPinnedWarmupRounds(built)
+  }, [mode, pinnedWarmupRounds, week, practiceLang, progress, minigameRoundOptions])
 
   useEffect(() => {
     if (mode !== 'mission') {
       setMissionPhase('dictation')
       return
     }
-    setMissionPhase(warmupRounds.length > 0 ? 'warmup' : 'dictation')
+    setMissionPhase((prev) => {
+      if (prev === 'dictation') return prev
+      return warmupRounds.length > 0 ? 'warmup' : 'dictation'
+    })
   }, [mode, warmupRounds.length, practiceLang])
 
   useEffect(() => {
+    if (prevPracticeLangRef.current === practiceLang) return
+    prevPracticeLangRef.current = practiceLang
+    clearPracticeSession()
+    setWordOrder(null)
+    setPinnedWarmupRounds(null)
+    setPinnedFreeRounds(null)
     if (mode === 'mission') {
       setMissionAudioReady(false)
       setDictationStarted(false)
     }
-  }, [mode, practiceLang])
-
-  useEffect(() => {
     if (mode === 'dictation') setDictationSession('pick')
     if (mode === 'minigames') {
       setMinigameSession('pick')
@@ -140,16 +292,23 @@ export function PracticePage() {
   }, [mode, practiceLang])
 
   useEffect(() => {
-    if (mode !== 'dictation' || dictationSession === 'pick') return
-    setIndex(0)
-    setInput('')
-    setFeedback('idle')
-    setFinished(false)
-    setScore(0)
-    setShowWord(false)
+    if (mode !== 'dictation') return
+    if (prevDictationSessionRef.current === dictationSession) return
+    const wasPick = prevDictationSessionRef.current === 'pick'
+    prevDictationSessionRef.current = dictationSession
+    if (wasPick && dictationSession !== 'pick') {
+      setIndex(0)
+      setInput('')
+      setFeedback('idle')
+      setFinished(false)
+      setScore(0)
+      setShowWord(false)
+      setDictationStarted(false)
+    }
   }, [mode, dictationSession])
 
   const freeMinigameRounds = useMemo(() => {
+    if (pinnedFreeRounds) return pinnedFreeRounds
     if (!week || !practiceLang || mode !== 'minigames' || minigameSession !== 'play') {
       return []
     }
@@ -159,6 +318,7 @@ export function PracticePage() {
       minigameRoundOptions,
     )
   }, [
+    pinnedFreeRounds,
     week,
     practiceLang,
     mode,
@@ -168,11 +328,142 @@ export function PracticePage() {
     minigameRoundOptions,
   ])
 
+  useEffect(() => {
+    if (mode !== 'minigames' || minigameSession !== 'play' || pinnedFreeRounds) return
+    if (!week || !practiceLang) return
+    const built = buildFreeMinigameRounds(
+      getWordsForLang(week, practiceLang),
+      minigamePlayMode,
+      minigameRoundOptions,
+    )
+    if (built.length > 0) setPinnedFreeRounds(built)
+  }, [
+    mode,
+    minigameSession,
+    pinnedFreeRounds,
+    week,
+    practiceLang,
+    minigameRun,
+    minigamePlayMode,
+    minigameRoundOptions,
+  ])
+
+  useEffect(() => {
+    if (!week || !practiceLang || mode === 'paper') return
+
+    if (mode === 'dictation' && dictationSession === 'pick') {
+      clearPracticeSession()
+      return
+    }
+    if (mode === 'minigames' && minigameSession === 'pick') {
+      clearPracticeSession()
+      return
+    }
+    if (finished) {
+      clearPracticeSession()
+      return
+    }
+
+    let payload: TypingSessionPayload | MinigameSessionPayload | null = null
+
+    if (
+      mode === 'minigames' &&
+      minigameSession === 'play' &&
+      pinnedFreeRounds &&
+      pinnedFreeRounds.length > 0
+    ) {
+      payload = {
+        type: 'minigame',
+        variant: 'free',
+        rounds: pinnedFreeRounds,
+        index: minigameLive.index,
+        feedback: minigameLive.feedback,
+        started: minigameLive.started,
+        minigameSession,
+        minigamePlayMode,
+        minigameRun,
+        freeMinigamesDone,
+      }
+    } else if (
+      mode === 'mission' &&
+      missionPhase === 'warmup' &&
+      missionAudioReady &&
+      pinnedWarmupRounds &&
+      pinnedWarmupRounds.length > 0
+    ) {
+      payload = {
+        type: 'minigame',
+        variant: 'warmup',
+        rounds: pinnedWarmupRounds,
+        index: minigameLive.index,
+        feedback: minigameLive.feedback,
+        started: minigameLive.started,
+        minigameSession: 'play',
+        minigamePlayMode: 'mix',
+        minigameRun: 0,
+        freeMinigamesDone: false,
+      }
+    } else if (wordOrder?.length) {
+      const typingModes: PracticeMode[] = ['mission', 'dictation', 'challenge', 'mistakes']
+      const inDictationPlay = mode === 'dictation' && dictationSession !== 'pick'
+      if (typingModes.includes(mode) && (mode !== 'dictation' || inDictationPlay)) {
+        payload = {
+          type: 'typing',
+          wordOrder,
+          index,
+          input,
+          feedback,
+          score,
+          finished,
+          dictationStarted,
+          missionPhase,
+          missionAudioReady,
+          dictationSession: mode === 'dictation' ? dictationSession : 'pick',
+        }
+      }
+    }
+
+    if (!payload) return
+
+    savePracticeSession({
+      v: 1,
+      weekLabel: week.weekLabel,
+      publishedAt: week.publishedAt,
+      lang: practiceLang,
+      routeMode: mode,
+      active: isSessionActivePayload(payload),
+      payload,
+    })
+  }, [
+    week,
+    practiceLang,
+    mode,
+    dictationSession,
+    minigameSession,
+    finished,
+    wordOrder,
+    index,
+    input,
+    feedback,
+    score,
+    dictationStarted,
+    missionPhase,
+    missionAudioReady,
+    pinnedFreeRounds,
+    pinnedWarmupRounds,
+    minigameLive,
+    minigamePlayMode,
+    minigameRun,
+    freeMinigamesDone,
+  ])
+
   function startMinigame(playMode: MinigamePlayMode) {
+    setPinnedFreeRounds(null)
     setMinigamePlayMode(playMode)
     setMinigameSession('play')
     setFreeMinigamesDone(false)
     setMinigameRun((n) => n + 1)
+    setMinigameLive({ index: 0, feedback: 'idle', started: false })
   }
 
   function resetDictationPlayState() {
@@ -186,11 +477,14 @@ export function PracticePage() {
   }
 
   function backToDictationPick() {
+    clearPracticeSession()
     setDictationSession('pick')
     resetDictationPlayState()
   }
 
   function backToMinigamePick() {
+    clearPracticeSession()
+    setPinnedFreeRounds(null)
     setMinigameSession('pick')
     setFreeMinigamesDone(false)
   }
@@ -227,7 +521,11 @@ export function PracticePage() {
 
   if (mode === 'paper') {
     return (
-      <PaperDictationPlayer lang={practiceLang} words={getWordsForLang(week, practiceLang)} />
+      <PaperDictationPlayer
+        week={week}
+        lang={practiceLang}
+        words={getWordsForLang(week, practiceLang)}
+      />
     )
   }
 
@@ -318,6 +616,16 @@ export function PracticePage() {
         rounds={warmupRounds}
         lang={activeLang}
         skipInitialGate
+        initialPersisted={
+          miniSaved?.variant === 'warmup'
+            ? {
+                index: miniSaved.index,
+                feedback: miniSaved.feedback,
+                started: miniSaved.started,
+              }
+            : undefined
+        }
+        onPersist={handleMinigamePersist}
         onComplete={() => {
           setMissionPhase('dictation')
           setDictationStarted(true)
@@ -506,7 +814,20 @@ export function PracticePage() {
         variant="free"
         rounds={freeMinigameRounds}
         lang={activeLang}
-        onComplete={() => setFreeMinigamesDone(true)}
+        initialPersisted={
+          miniSaved?.variant === 'free'
+            ? {
+                index: miniSaved.index,
+                feedback: miniSaved.feedback,
+                started: miniSaved.started,
+              }
+            : undefined
+        }
+        onPersist={handleMinigamePersist}
+        onComplete={() => {
+          clearPracticeSession()
+          setFreeMinigamesDone(true)
+        }}
       />
     )
   }
@@ -557,7 +878,7 @@ export function PracticePage() {
     if (ok) setScore((s) => s + 1)
 
     if (ok) {
-      speakWord(current, activeLang, { preferPiper: true })
+      void speakCorrectFeedback(activeLang, childName)
     }
   }
 
@@ -566,6 +887,7 @@ export function PracticePage() {
       if (playMode === 'mission') {
         setProgress(markMissionComplete(progress))
       }
+      clearPracticeSession()
       setFinished(true)
       return
     }
@@ -662,9 +984,11 @@ export function PracticePage() {
           }}
         />
 
-        {liveLetterHint && feedback === 'idle' && playMode !== 'challenge' && (
-          <LiveLetterFeedback typed={input} expected={current} lang={activeLang} />
-        )}
+        {liveLetterHint &&
+          (feedback === 'idle' || feedback === 'ok') &&
+          playMode !== 'challenge' && (
+            <LiveLetterFeedback typed={input} expected={current} lang={activeLang} />
+          )}
 
         {feedback === 'idle' && (
           <button type="button" className="btn btn--primary btn--block" onClick={checkAnswer}>
@@ -673,7 +997,7 @@ export function PracticePage() {
         )}
         {feedback === 'ok' && (
           <>
-            <p className="feedback feedback--ok">{t('practice.correct')}</p>
+            <CorrectFeedback lang={activeLang} childName={childName} word={current} />
             <button type="button" className="btn btn--primary btn--block" onClick={goNext}>
               {index + 1 >= words.length ? t('practice.finish') : t('practice.next')}
             </button>

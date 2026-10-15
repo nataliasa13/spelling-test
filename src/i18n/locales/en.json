@@ -86,6 +86,7 @@
     "finishMinigamesTitle": "Games round done!",
     "finishStreak": "🔥 {{count}} day mission streak",
     "correct": "Well done!",
+    "correctWithName": "Well done, {{name}}!",
     "tryAgain": "Try again — you can do it!",
     "almost": "Almost! It was: {{word}}",
     "progress": "{{current}} / {{total}}",

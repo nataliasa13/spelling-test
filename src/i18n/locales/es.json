@@ -86,6 +86,7 @@
     "finishMinigamesTitle": "¡Ronda de juegos lista!",
     "finishStreak": "🔥 {{count}} días seguidos con misión",
     "correct": "¡Muy bien!",
+    "correctWithName": "¡Muy bien, {{name}}!",
     "tryAgain": "Otra vez — ¡tú puedes!",
     "almost": "Casi — era: {{word}}",
     "progress": "{{current}} / {{total}}",

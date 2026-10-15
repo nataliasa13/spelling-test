@@ -1,12 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LangFlag } from './LangFlag'
 import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
 import { PracticeFinishScreen } from './PracticeFinishScreen'
 import { loadPaperDictationShuffle, savePaperDictationShuffle } from '../lib/storage'
+import {
+  clearPracticeSession,
+  isSessionActivePayload,
+  loadPracticeSession,
+  matchesPracticeSessionScope,
+  savePracticeSession,
+  wordOrderMatchesWeek,
+  type PaperSessionPayload,
+} from '../lib/practiceSession'
 import { useVoiceLoadingLabel } from '../hooks/useVoiceLoadingLabel'
 import { ensureSpeechReady, speakWord, unlockAudio } from '../lib/speech'
-import type { SpellingLang } from '../types'
+import type { SpellingLang, WeekPack } from '../types'
 
 function shuffleWords<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -18,22 +27,67 @@ function shuffleWords<T>(arr: T[]): T[] {
 }
 
 type Props = {
+  week: WeekPack
   lang: SpellingLang
   words: string[]
 }
 
-export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
+const ROUTE_MODE = 'paper'
+
+export function PaperDictationPlayer({ week, lang, words: sourceWords }: Props) {
   const { t } = useTranslation()
-  const [phase, setPhase] = useState<'setup' | 'active' | 'done'>('setup')
-  const [shuffle, setShuffle] = useState(() => loadPaperDictationShuffle())
-  const [runId, setRunId] = useState(0)
-  const [index, setIndex] = useState(0)
+
+  const savedRef = useRef<PaperSessionPayload | null | undefined>(undefined)
+  if (savedRef.current === undefined) {
+    const s = loadPracticeSession()
+    savedRef.current =
+      s?.payload.type === 'paper' &&
+      matchesPracticeSessionScope(s, week, lang, ROUTE_MODE) &&
+      wordOrderMatchesWeek(s.payload.wordOrder, week, lang)
+        ? s.payload
+        : null
+  }
+  const paperSaved = savedRef.current
+
+  const [phase, setPhase] = useState<'setup' | 'active' | 'done'>(paperSaved?.phase ?? 'setup')
+  const [shuffle, setShuffle] = useState(() => paperSaved?.shuffle ?? loadPaperDictationShuffle())
+  const [runId, setRunId] = useState(paperSaved?.runId ?? 0)
+  const [index, setIndex] = useState(paperSaved?.index ?? 0)
   const [loading, setLoading] = useState(false)
+  const [wordOrder, setWordOrder] = useState<string[] | null>(paperSaved?.wordOrder ?? null)
 
   const words = useMemo(() => {
+    if (wordOrder?.length) return wordOrder
     const base = [...sourceWords]
     return shuffle ? shuffleWords(base) : base
-  }, [sourceWords, shuffle, runId])
+  }, [sourceWords, shuffle, runId, wordOrder])
+
+  useEffect(() => {
+    if (wordOrder?.length) return
+    const base = [...sourceWords]
+    setWordOrder(shuffle ? shuffleWords(base) : base)
+  }, [sourceWords, shuffle, runId, wordOrder])
+
+  useEffect(() => {
+    if (!wordOrder?.length) return
+    const payload: PaperSessionPayload = {
+      type: 'paper',
+      phase,
+      shuffle,
+      wordOrder,
+      runId,
+      index,
+    }
+    savePracticeSession({
+      v: 1,
+      weekLabel: week.weekLabel,
+      publishedAt: week.publishedAt,
+      lang,
+      routeMode: ROUTE_MODE,
+      active: isSessionActivePayload(payload),
+      payload,
+    })
+  }, [week.weekLabel, week.publishedAt, lang, phase, shuffle, wordOrder, runId, index])
 
   const current = words[index]
   const langLabel = t(lang === 'english' ? 'words.english' : 'words.spanish')
@@ -63,6 +117,7 @@ export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
   function onNext() {
     if (index + 1 >= words.length) {
       setPhase('done')
+      clearPracticeSession()
       return
     }
     unlockAudio()
@@ -73,6 +128,8 @@ export function PaperDictationPlayer({ lang, words: sourceWords }: Props) {
   }
 
   function playAgain() {
+    clearPracticeSession()
+    setWordOrder(null)
     setRunId((n) => n + 1)
     setIndex(0)
     setPhase('setup')

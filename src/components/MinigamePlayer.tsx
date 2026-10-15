@@ -2,11 +2,20 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { WarmupRound } from '../lib/minigames'
 import type { SpellingLang } from '../types'
+import { useAppState } from '../context/AppState'
+import { speakCorrectFeedback } from '../lib/correctFeedback'
+import { speakWord, unlockAudio } from '../lib/speech'
+import { CorrectFeedback } from './CorrectFeedback'
 import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
 import { SectionListenGate } from './SectionListenGate'
-import { speakWord, unlockAudio } from '../lib/speech'
 
 export type MinigameVariant = 'warmup' | 'free'
+
+export type MinigamePersistedState = {
+  index: number
+  feedback: 'idle' | 'ok' | 'bad'
+  started: boolean
+}
 
 type Props = {
   variant: MinigameVariant
@@ -15,6 +24,8 @@ type Props = {
   onComplete: () => void
   /** Misión: el sonido ya se activó en la pantalla única de empezar. */
   skipInitialGate?: boolean
+  initialPersisted?: MinigamePersistedState
+  onPersist?: (state: MinigamePersistedState) => void
 }
 
 export function MinigamePlayer({
@@ -23,14 +34,26 @@ export function MinigamePlayer({
   lang,
   onComplete,
   skipInitialGate = false,
+  initialPersisted,
+  onPersist,
 }: Props) {
   const { t } = useTranslation()
-  const [index, setIndex] = useState(0)
-  const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>('idle')
-  const [started, setStarted] = useState(skipInitialGate)
+  const { childName } = useAppState()
+  const [index, setIndex] = useState(initialPersisted?.index ?? 0)
+  const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>(initialPersisted?.feedback ?? 'idle')
+  const [started, setStarted] = useState(initialPersisted?.started ?? skipInitialGate)
   const round = rounds[index]
 
+  useEffect(() => {
+    onPersist?.({ index, feedback, started })
+  }, [index, feedback, started, onPersist])
+
   if (!round) return null
+
+  function onRoundAnswer(ok: boolean) {
+    setFeedback(ok ? 'ok' : 'bad')
+    if (ok) void speakCorrectFeedback(lang, childName)
+  }
 
   function goNext() {
     setFeedback('idle')
@@ -77,9 +100,8 @@ export function MinigamePlayer({
           round={round}
           lang={lang}
           feedback={feedback}
-          onAnswer={(ok) => {
-            setFeedback(ok ? 'ok' : 'bad')
-          }}
+          childName={childName}
+          onAnswer={onRoundAnswer}
           onNext={goNext}
           onRetry={() => setFeedback('idle')}
         />
@@ -88,9 +110,8 @@ export function MinigamePlayer({
           round={round}
           lang={lang}
           feedback={feedback}
-          onAnswer={(ok) => {
-            setFeedback(ok ? 'ok' : 'bad')
-          }}
+          childName={childName}
+          onAnswer={onRoundAnswer}
           onNext={goNext}
           onRetry={() => setFeedback('idle')}
         />
@@ -99,9 +120,8 @@ export function MinigamePlayer({
           round={round}
           lang={lang}
           feedback={feedback}
-          onAnswer={(ok) => {
-            setFeedback(ok ? 'ok' : 'bad')
-          }}
+          childName={childName}
+          onAnswer={onRoundAnswer}
           onNext={goNext}
           onRetry={() => setFeedback('idle')}
         />
@@ -113,11 +133,15 @@ export function MinigamePlayer({
 function FeedbackBlock({
   feedback,
   word,
+  lang,
+  childName,
   onNext,
   onRetry,
 }: {
   feedback: 'idle' | 'ok' | 'bad'
   word: string
+  lang: SpellingLang
+  childName: string | null
   onNext: () => void
   onRetry: () => void
 }) {
@@ -125,9 +149,11 @@ function FeedbackBlock({
   if (feedback === 'idle') return null
   return (
     <>
-      <p className={feedback === 'ok' ? 'feedback feedback--ok' : 'feedback feedback--bad'}>
-        {feedback === 'ok' ? t('practice.correct') : t('practice.warmupTryAgain', { word })}
-      </p>
+      {feedback === 'ok' ? (
+        <CorrectFeedback lang={lang} childName={childName} word={word} />
+      ) : (
+        <p className="feedback feedback--bad">{t('practice.warmupTryAgain', { word })}</p>
+      )}
       {feedback === 'bad' ? (
         <div className="warmup-feedback-actions">
           <button type="button" className="btn btn--primary btn--block" onClick={onRetry}>
@@ -150,6 +176,7 @@ function BlankRound({
   round,
   lang,
   feedback,
+  childName,
   onAnswer,
   onNext,
   onRetry,
@@ -157,6 +184,7 @@ function BlankRound({
   round: Extract<WarmupRound, { kind: 'blank' }>
   lang: SpellingLang
   feedback: 'idle' | 'ok' | 'bad'
+  childName: string | null
   onAnswer: (ok: boolean) => void
   onNext: () => void
   onRetry: () => void
@@ -185,6 +213,8 @@ function BlankRound({
       <FeedbackBlock
         feedback={feedback}
         word={round.word}
+        lang={lang}
+        childName={childName}
         onNext={onNext}
         onRetry={onRetry}
       />
@@ -196,6 +226,7 @@ function MatchRound({
   round,
   lang,
   feedback,
+  childName,
   onAnswer,
   onNext,
   onRetry,
@@ -203,6 +234,7 @@ function MatchRound({
   round: Extract<WarmupRound, { kind: 'match' }>
   lang: SpellingLang
   feedback: 'idle' | 'ok' | 'bad'
+  childName: string | null
   onAnswer: (ok: boolean) => void
   onNext: () => void
   onRetry: () => void
@@ -233,6 +265,8 @@ function MatchRound({
       <FeedbackBlock
         feedback={feedback}
         word={round.word}
+        lang={lang}
+        childName={childName}
         onNext={onNext}
         onRetry={onRetry}
       />
@@ -244,6 +278,7 @@ function ScrambleRound({
   round,
   lang,
   feedback,
+  childName,
   onAnswer,
   onNext,
   onRetry,
@@ -251,6 +286,7 @@ function ScrambleRound({
   round: Extract<WarmupRound, { kind: 'scramble' }>
   lang: SpellingLang
   feedback: 'idle' | 'ok' | 'bad'
+  childName: string | null
   onAnswer: (ok: boolean) => void
   onNext: () => void
   onRetry: () => void
@@ -324,6 +360,8 @@ function ScrambleRound({
       <FeedbackBlock
         feedback={feedback}
         word={round.word}
+        lang={lang}
+        childName={childName}
         onNext={onNext}
         onRetry={retryScramble}
       />

@@ -1,3 +1,5 @@
+import { deferAppBuildUpdate, hasActivePracticeSession } from './practiceSession'
+
 const RELOAD_FOR_KEY = 'spellings_app_reload_for'
 
 /** Id embebido en el bundle de esta sesión (hash del commit en producción). */
@@ -38,6 +40,11 @@ export async function ensureLatestAppBuild(): Promise<void> {
   if (!remoteBuild || remoteBuild === embedded) return
 
   if (sessionStorage.getItem(RELOAD_FOR_KEY) === remoteBuild) {
+    return
+  }
+
+  if (hasActivePracticeSession()) {
+    deferAppBuildUpdate(remoteBuild)
     return
   }
 
