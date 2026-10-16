@@ -193,11 +193,12 @@ function BlankRound({
   onRetry: () => void
 }) {
   const { t } = useTranslation()
+  const displayWord = feedback === 'ok' ? round.word : round.display
 
   return (
     <div className="practice-card practice-card--minigame">
       <p className="warmup-prompt">{t('practice.warmupBlankPrompt')}</p>
-      <p className="warmup-display">{round.display}</p>
+      <p className="warmup-display">{displayWord}</p>
       <ListenAgainButton word={round.word} lang={lang} className="listen-again-btn--minigame" />
       {feedback !== 'ok' && (
         <div className="warmup-options">
