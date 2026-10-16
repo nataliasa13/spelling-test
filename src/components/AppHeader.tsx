@@ -1,4 +1,7 @@
+import type { MouseEvent } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { resolveAppPath } from '../lib/appPaths'
 import { useTranslation } from 'react-i18next'
 import { usePracticeBack } from '../context/PracticeBackContext'
 
@@ -25,16 +28,26 @@ function SettingsGearIcon() {
 export function AppHeader() {
   const { t } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const isSettings = location.pathname === '/settings'
   const practiceBack = usePracticeBack()
-  const navigate = useNavigate()
 
   /** Volver en el historial en vez de apilar otra entrada a "/" (evita historiales llenos de duplicados). */
   function goBack() {
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
     if (idx > 0) navigate(-1)
     else navigate('/', { replace: true })
+  }
+
+  function openSettings(e: MouseEvent<HTMLAnchorElement>) {
+    if (isSettings) return
+    e.preventDefault()
+    flushSync(() => {
+      navigate('/settings')
+    })
+    if (document.querySelector('.settings-page')) return
+    window.location.assign(resolveAppPath('/settings'))
   }
 
   return (
@@ -74,6 +87,7 @@ export function AppHeader() {
             className={`app-header__menu-btn${isSettings ? ' app-header__menu-btn--active' : ''}`}
             aria-label={t('nav.settings')}
             aria-current={isSettings ? 'page' : undefined}
+            onClick={openSettings}
           >
             <SettingsGearIcon />
           </Link>

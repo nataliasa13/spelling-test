@@ -4,8 +4,10 @@ import type { WarmupRound } from '../lib/minigames'
 import type { SpellingLang } from '../types'
 import { useAppState } from '../context/AppState'
 import { speakCorrectFeedback } from '../lib/correctFeedback'
+import { speakTryAgainEncourage } from '../lib/tryAgainFeedback'
 import { speakWord, unlockAudio } from '../lib/speech'
 import { CorrectFeedback } from './CorrectFeedback'
+import { TryAgainFeedback } from './TryAgainFeedback'
 import { ListenAgainButton, ListenIcon } from './ListenAgainButton'
 import { SectionListenGate } from './SectionListenGate'
 
@@ -53,6 +55,7 @@ export function MinigamePlayer({
   function onRoundAnswer(ok: boolean) {
     setFeedback(ok ? 'ok' : 'bad')
     if (ok) void speakCorrectFeedback(lang, childName)
+    else void speakTryAgainEncourage(lang, childName)
   }
 
   function goNext() {
@@ -152,7 +155,7 @@ function FeedbackBlock({
       {feedback === 'ok' ? (
         <CorrectFeedback lang={lang} childName={childName} word={word} />
       ) : (
-        <p className="feedback feedback--bad">{t('practice.warmupTryAgain', { word })}</p>
+        <TryAgainFeedback lang={lang} childName={childName} kind="minigame" word={word} />
       )}
       {feedback === 'bad' ? (
         <div className="warmup-feedback-actions">

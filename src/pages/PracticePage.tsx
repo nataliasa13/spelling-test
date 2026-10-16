@@ -7,7 +7,9 @@ import { usePracticeBack } from '../context/PracticeBackContext'
 import { answersMatch } from '../lib/words'
 import { ListenAgainButton, ListenIcon } from '../components/ListenAgainButton'
 import { CorrectFeedback } from '../components/CorrectFeedback'
+import { TryAgainFeedback } from '../components/TryAgainFeedback'
 import { speakCorrectFeedback } from '../lib/correctFeedback'
+import { speakTryAgainEncourage } from '../lib/tryAgainFeedback'
 import { speakWord } from '../lib/speech'
 import { logNavDiag } from '../lib/navDiagnostics'
 import {
@@ -880,7 +882,8 @@ export function PracticePage() {
   const current = words[index]
 
   const allowPeek = playMode !== 'challenge'
-  const allowRetrySame = playMode === 'free' || playMode === 'mistakes' || feedback === 'bad'
+  /** Reto: un intento por palabra; resto: corregir sin borrar el texto. */
+  const allowCorrectInPlace = playMode !== 'challenge'
 
   const currentProgress = getWordProgress(progress, activeLang, current)
   const masteredBefore = currentProgress.mastered
@@ -909,8 +912,13 @@ export function PracticePage() {
 
     if (ok) {
       void speakCorrectFeedback(activeLang, childName)
+    } else {
+      void speakTryAgainEncourage(activeLang, childName)
     }
   }
+
+  const tryAgainKind =
+    playMode === 'free' || playMode === 'mistakes' ? 'encourage' : 'reveal'
 
   function goNext() {
     if (index + 1 >= words.length) {
@@ -1003,19 +1011,26 @@ export function PracticePage() {
         <input
           className="practice-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value)
+            if (feedback === 'bad' && allowCorrectInPlace) setFeedback('idle')
+          }}
           placeholder={t('practice.typePlaceholder')}
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && feedback === 'idle') checkAnswer()
+            if (e.key === 'Enter' && feedback === 'bad') {
+              if (allowCorrectInPlace) checkAnswer()
+              else goNext()
+            }
             if (e.key === 'Enter' && feedback === 'ok') goNext()
           }}
         />
 
         {liveLetterHint &&
-          (feedback === 'idle' || feedback === 'ok') &&
+          (feedback === 'idle' || feedback === 'ok' || feedback === 'bad') &&
           playMode !== 'challenge' && (
             <LiveLetterFeedback typed={input} expected={current} lang={activeLang} />
           )}
@@ -1035,22 +1050,32 @@ export function PracticePage() {
         )}
         {feedback === 'bad' && (
           <>
-            <p className="feedback feedback--bad">
-              {playMode === 'free' || playMode === 'mistakes'
-                ? t('practice.tryAgain')
-                : t('practice.almost', { word: current })}
-            </p>
-            {allowRetrySame ? (
-              <button
-                type="button"
-                className="btn btn--block"
-                onClick={() => {
-                  setFeedback('idle')
-                  setInput('')
-                }}
-              >
-                {t('practice.tryAgain')}
-              </button>
+            <TryAgainFeedback
+              lang={activeLang}
+              childName={childName}
+              kind={tryAgainKind}
+              word={current}
+            />
+            {allowCorrectInPlace ? (
+              <div className="practice-retry-actions">
+                <button
+                  type="button"
+                  className="btn btn--primary btn--block"
+                  onClick={checkAnswer}
+                >
+                  {t('practice.submitAgain')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--block"
+                  onClick={() => {
+                    setInput('')
+                    setFeedback('idle')
+                  }}
+                >
+                  {t('practice.clearAndRetry')}
+                </button>
+              </div>
             ) : (
               <button type="button" className="btn btn--primary btn--block" onClick={goNext}>
                 {t('practice.next')}

@@ -1925,6 +1925,13 @@ button.activity-choice:not(:disabled):active {
   margin-bottom: 6px;
 }
 
+.practice-retry-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
 .feedback {
   text-align: center;
   font-weight: 600;
@@ -1965,6 +1972,33 @@ button.activity-choice:not(:disabled):active {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--stp-ink);
+}
+
+.try-again-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 12px 0 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: rgb(237 174 68 / 14%);
+  border: 2px solid rgb(196 132 26 / 45%);
+}
+
+.try-again-feedback__icon {
+  width: 52px;
+  height: 52px;
+  color: #9a6510;
+}
+
+.try-again-feedback__message {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #7a5510;
+  text-align: center;
+  line-height: 1.35;
 }
 
 .feedback--ok {
