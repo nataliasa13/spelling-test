@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePracticeBack } from '../context/PracticeBackContext'
 
@@ -28,6 +28,14 @@ export function AppHeader() {
   const isHome = location.pathname === '/'
   const isSettings = location.pathname === '/settings'
   const practiceBack = usePracticeBack()
+  const navigate = useNavigate()
+
+  /** Volver en el historial en vez de apilar otra entrada a "/" (evita historiales llenos de duplicados). */
+  function goBack() {
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
+    if (idx > 0) navigate(-1)
+    else navigate('/', { replace: true })
+  }
 
   return (
     <header className="app-header">
@@ -44,9 +52,14 @@ export function AppHeader() {
                 ←
               </button>
             ) : (
-              <Link to="/" className="app-header__back" aria-label={t('nav.back')}>
+              <button
+                type="button"
+                className="app-header__back"
+                aria-label={t('nav.back')}
+                onClick={goBack}
+              >
                 ←
-              </Link>
+              </button>
             ))}
         </div>
 

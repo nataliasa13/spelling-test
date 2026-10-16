@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getWordsForLang } from '../config/languages'
 import { useAppState } from '../context/AppState'
@@ -9,6 +9,7 @@ import { ListenAgainButton, ListenIcon } from '../components/ListenAgainButton'
 import { CorrectFeedback } from '../components/CorrectFeedback'
 import { speakCorrectFeedback } from '../lib/correctFeedback'
 import { speakWord } from '../lib/speech'
+import { logNavDiag } from '../lib/navDiagnostics'
 import {
   buildMistakeReviewWords,
   challengeThreshold,
@@ -51,6 +52,12 @@ function dictationPlayMode(session: DictationSessionKind): 'free' | 'challenge' 
   return null
 }
 
+/** El sub-estado del dictado va en la URL para que recargas y atrás/adelante caigan en el mismo punto. */
+function dictationSessionFromUrl(mode: string, sub: string | undefined): DictationSessionKind {
+  if (mode !== 'dictation') return 'pick'
+  return sub === 'practice' || sub === 'exam' ? sub : 'pick'
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -61,11 +68,21 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function PracticePage() {
-  const { mode: modeParam } = useParams<{ mode: string }>()
+  const { mode: modeParam, sub } = useParams<{ mode: string; sub?: string }>()
   const mode = (modeParam as PracticeMode) || 'mission'
+  const navigate = useNavigate()
+  const dictationSession = dictationSessionFromUrl(mode, sub)
+  const setDictationSession = useCallback(
+    (next: DictationSessionKind) => {
+      navigate(next === 'pick' ? '/practice/dictation' : `/practice/dictation/${next}`, {
+        replace: true,
+      })
+    },
+    [navigate],
+  )
   const { t } = useTranslation()
   const { week, progress, setProgress, practiceLang, childName } = useAppState()
-  const practiceBackCtx = usePracticeBack()
+  const practiceBackSetHandler = usePracticeBack()?.setHandler
 
   const savedRef = useRef<
     | {
@@ -78,8 +95,12 @@ export function PracticePage() {
     if (week && practiceLang) {
       const s = loadPracticeSession()
       const ok = s && matchesPracticeSessionScope(s, week, practiceLang, mode)
+      const typingOk =
+        ok &&
+        s.payload.type === 'typing' &&
+        (mode !== 'dictation' || s.payload.dictationSession === dictationSession)
       savedRef.current = {
-        typing: ok && s.payload.type === 'typing' ? s.payload : null,
+        typing: typingOk && s.payload.type === 'typing' ? s.payload : null,
         minigame: ok && s.payload.type === 'minigame' ? s.payload : null,
       }
     } else {
@@ -111,9 +132,6 @@ export function PracticePage() {
   const [missionPhase, setMissionPhase] = useState<'warmup' | 'dictation'>(
     typingSaved?.missionPhase ?? 'warmup',
   )
-  const [dictationSession, setDictationSession] = useState<DictationSessionKind>(
-    typingSaved?.dictationSession ?? 'pick',
-  )
   const [minigameRun, setMinigameRun] = useState(miniSaved?.minigameRun ?? 0)
   const [minigameSession, setMinigameSession] = useState<'pick' | 'play'>(
     miniSaved?.minigameSession ?? 'pick',
@@ -141,6 +159,13 @@ export function PracticePage() {
     setMinigameLive(state)
   }, [])
 
+  useEffect(() => {
+    logNavDiag('practice-mount', {
+      restored: !!(typingSaved || miniSaved),
+      index: typingSaved?.index,
+    })
+  }, [])
+
   const prevPracticeLangRef = useRef(practiceLang)
   const prevDictationSessionRef = useRef(dictationSession)
   const prevModeRef = useRef(mode)
@@ -163,8 +188,6 @@ export function PracticePage() {
     setDictationStarted(payload.dictationStarted)
     setMissionPhase(payload.missionPhase)
     setMissionAudioReady(payload.missionAudioReady)
-    setDictationSession(payload.dictationSession)
-    prevDictationSessionRef.current = payload.dictationSession
   }
 
   function applyMinigameRestore(payload: MinigameSessionPayload) {
@@ -184,16 +207,25 @@ export function PracticePage() {
   useEffect(() => {
     if (prevModeRef.current === mode) return
     prevModeRef.current = mode
+    prevDictationSessionRef.current = dictationSession
 
     if (!week || !practiceLang) return
     const s = loadPracticeSession()
     if (s && matchesPracticeSessionScope(s, week, practiceLang, mode)) {
-      if (s.payload.type === 'typing') applyTypingRestore(s.payload)
-      else if (s.payload.type === 'minigame') applyMinigameRestore(s.payload)
-      return
+      if (
+        s.payload.type === 'typing' &&
+        (mode !== 'dictation' || s.payload.dictationSession === dictationSession)
+      ) {
+        applyTypingRestore(s.payload)
+        return
+      }
+      if (s.payload.type === 'minigame') {
+        applyMinigameRestore(s.payload)
+        return
+      }
     }
 
-    clearPracticeSession()
+    // Sin borrar la sesión guardada: un atrás/adelante a otro modo no debe perder el progreso.
     setWordOrder(null)
     setIndex(0)
     setInput('')
@@ -201,8 +233,6 @@ export function PracticePage() {
     setFinished(false)
     setScore(0)
     setShowWord(false)
-    setDictationSession('pick')
-    prevDictationSessionRef.current = 'pick'
     setDictationStarted(false)
     setMissionAudioReady(false)
     setMissionPhase('warmup')
@@ -289,7 +319,7 @@ export function PracticePage() {
       setMinigameSession('pick')
       setFreeMinigamesDone(false)
     }
-  }, [mode, practiceLang])
+  }, [mode, practiceLang, setDictationSession])
 
   useEffect(() => {
     if (mode !== 'dictation') return
@@ -351,14 +381,9 @@ export function PracticePage() {
   useEffect(() => {
     if (!week || !practiceLang || mode === 'paper') return
 
-    if (mode === 'dictation' && dictationSession === 'pick') {
-      clearPracticeSession()
-      return
-    }
-    if (mode === 'minigames' && minigameSession === 'pick') {
-      clearPracticeSession()
-      return
-    }
+    // En las pantallas de elegir no se guarda ni se borra: solo las acciones explícitas borran.
+    if (mode === 'dictation' && dictationSession === 'pick') return
+    if (mode === 'minigames' && minigameSession === 'pick') return
     if (finished) {
       clearPracticeSession()
       return
@@ -490,19 +515,20 @@ export function PracticePage() {
   }
 
   useEffect(() => {
-    const ctx = practiceBackCtx
-    if (!ctx) return
+    // Solo setHandler (estable): depender del contexto entero entra en bucle al cambiar el handler.
+    const setHandler = practiceBackSetHandler
+    if (!setHandler) return
 
     if (mode === 'dictation' && dictationSession !== 'pick') {
-      ctx.setHandler(() => backToDictationPick())
+      setHandler(() => backToDictationPick())
     } else if (mode === 'minigames' && minigameSession === 'play') {
-      ctx.setHandler(() => backToMinigamePick())
+      setHandler(() => backToMinigamePick())
     } else {
-      ctx.setHandler(null)
+      setHandler(null)
     }
 
-    return () => ctx.setHandler(null)
-  }, [mode, dictationSession, minigameSession, practiceBackCtx])
+    return () => setHandler(null)
+  }, [mode, dictationSession, minigameSession, practiceBackSetHandler])
 
   if (!week) return <Navigate to="/" replace />
   if (!practiceLang) return <Navigate to="/" replace />
@@ -549,6 +575,10 @@ export function PracticePage() {
     (w) => getWordProgress(progress, activeLang, w).mastered,
   ).length
 
+  if (mode === 'dictation' && dictationSession === 'exam' && !examUnlocked) {
+    return <Navigate to="/practice/dictation" replace />
+  }
+
   if (mode === 'mistakes' && words.length === 0) {
     return (
       <main className="page card card--center">
@@ -577,9 +607,9 @@ export function PracticePage() {
           {t('home.dareLocked', { need: challengeThreshold(langWords.length) })}
         </p>
         <p className="muted">{t('practice.challengeLockedHint')}</p>
-        <a href="/" className="btn btn--primary">
+        <Link to="/" replace className="btn btn--primary">
           {t('nav.home')}
-        </a>
+        </Link>
       </main>
     )
   }

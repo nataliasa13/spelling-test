@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage'
 import { WordsPage } from './pages/WordsPage'
 import { PracticePage } from './pages/PracticePage'
 import { SettingsPage } from './pages/SettingsPage'
+import { DiagPage } from './pages/DiagPage'
 
 export default function App() {
   return (
@@ -14,8 +15,10 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/words" element={<WordsPage />} />
-            <Route path="/practice/:mode" element={<PracticePage />} />
+            <Route path="/practice/:mode/:sub?" element={<PracticePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            {/* Oculta: sin enlaces, solo para depurar en el móvil. */}
+            <Route path="/diag" element={<DiagPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
