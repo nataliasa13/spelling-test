@@ -61,6 +61,7 @@
     "statusNew": "New",
     "statusPractising": "Practising",
     "statusMastered": "Got it!",
+    "listenA11y": "Listen: {{word}}",
     "mistakesTitle": "Extra practice",
     "mistakesHint": "Words missed most often in dictation (mission, free, or dare).",
     "mistakesCount_one": "1 miss",

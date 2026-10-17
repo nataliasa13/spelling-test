@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { SpellingLangSwitcher } from '../components/SpellingLangSwitcher'
 import { getLanguageDef, getWordsForLang } from '../config/languages'
 import { useAppState } from '../context/AppState'
+import { ListenAgainButton } from '../components/ListenAgainButton'
 import { FrequentMistakesPanel } from '../components/FrequentMistakesPanel'
 import { getFrequentMistakes, getWordProgress } from '../lib/progress'
 
@@ -34,7 +35,10 @@ function WordList({
 
           return (
             <li key={word} className={`word-pill ${statusClass}`}>
-              <span className="word-pill__word">{word}</span>
+              <div className="word-pill__main">
+                <ListenAgainButton word={word} lang={lang} iconOnly />
+                <span className="word-pill__word">{word}</span>
+              </div>
               <span className="word-pill__status">{status}</span>
             </li>
           )

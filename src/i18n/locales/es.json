@@ -61,6 +61,7 @@
     "statusNew": "Nueva",
     "statusPractising": "Practicando",
     "statusMastered": "¡Dominada!",
+    "listenA11y": "Escuchar: {{word}}",
     "mistakesTitle": "Repasar estas",
     "mistakesHint": "Palabras en las que más se ha fallado en dictado (misión, libre o reto).",
     "mistakesCount_one": "1 fallo",

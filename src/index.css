@@ -1362,6 +1362,17 @@ button.activity-choice:not(:disabled):active {
   border-color: rgb(131 168 70 / 30%);
 }
 
+.word-pill__main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.word-pill__word {
+  font-weight: 600;
+}
+
 .word-pill__status {
   font-size: 0.6875rem;
   font-weight: 600;
@@ -1893,6 +1904,16 @@ button.activity-choice:not(:disabled):active {
     opacity: 0.45;
     transform: scale(0.88);
   }
+}
+
+.listen-again-btn--icon {
+  flex-shrink: 0;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -4px 0 -4px -4px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .listen-again-btn--minigame {

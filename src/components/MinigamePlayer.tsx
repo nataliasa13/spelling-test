@@ -110,6 +110,7 @@ export function MinigamePlayer({
         />
       ) : round.kind === 'scramble' ? (
         <ScrambleRound
+          key={`${index}-${round.word}`}
           round={round}
           lang={lang}
           feedback={feedback}
@@ -278,6 +279,15 @@ function MatchRound({
   )
 }
 
+function scrambleBuilt(
+  picked: number[],
+  tiles: Extract<WarmupRound, { kind: 'scramble' }>['tiles'],
+): string {
+  return picked
+    .map((id) => tiles.find((tile) => tile.id === id)?.char ?? '')
+    .join('')
+}
+
 function ScrambleRound({
   round,
   lang,
@@ -299,11 +309,6 @@ function ScrambleRound({
   const [picked, setPicked] = useState<number[]>([])
   const [used, setUsed] = useState<Set<number>>(() => new Set())
 
-  useEffect(() => {
-    setPicked([])
-    setUsed(new Set())
-  }, [round.word])
-
   function toggleTile(id: number) {
     if (feedback !== 'idle') return
     if (used.has(id)) {
@@ -320,11 +325,11 @@ function ScrambleRound({
   }
 
   function check() {
-    const built = picked.map((id) => round.tiles.find((tile) => tile.id === id)!.char).join('')
+    const built = scrambleBuilt(picked, round.tiles)
     onAnswer(built === round.word)
   }
 
-  const built = picked.map((id) => round.tiles.find((tile) => tile.id === id)!.char).join('')
+  const built = scrambleBuilt(picked, round.tiles)
 
   function retryScramble() {
     setPicked([])

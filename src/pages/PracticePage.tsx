@@ -128,6 +128,7 @@ export function PracticePage() {
   const [index, setIndex] = useState(typingSaved?.index ?? 0)
   const [input, setInput] = useState(typingSaved?.input ?? '')
   const [feedback, setFeedback] = useState<'idle' | 'ok' | 'bad'>(typingSaved?.feedback ?? 'idle')
+  const practiceInputRef = useRef<HTMLInputElement>(null)
   const [showWord, setShowWord] = useState(false)
   const [finished, setFinished] = useState(typingSaved?.finished ?? false)
   const [score, setScore] = useState(typingSaved?.score ?? 0)
@@ -914,6 +915,9 @@ export function PracticePage() {
       void speakCorrectFeedback(activeLang, childName)
     } else {
       void speakTryAgainEncourage(activeLang, childName)
+      if (allowCorrectInPlace) {
+        requestAnimationFrame(() => practiceInputRef.current?.focus())
+      }
     }
   }
 
@@ -1009,6 +1013,7 @@ export function PracticePage() {
         </div>
 
         <input
+          ref={practiceInputRef}
           className="practice-input"
           value={input}
           onChange={(e) => {
@@ -1071,6 +1076,7 @@ export function PracticePage() {
                   onClick={() => {
                     setInput('')
                     setFeedback('idle')
+                    requestAnimationFrame(() => practiceInputRef.current?.focus())
                   }}
                 >
                   {t('practice.clearAndRetry')}

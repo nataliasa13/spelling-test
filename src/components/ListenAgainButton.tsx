@@ -35,11 +35,18 @@ type ButtonProps = {
   word: string
   lang: SpellingLang
   className?: string
+  /** Solo icono (p. ej. lista de palabras). */
+  iconOnly?: boolean
 }
 
 type ListenUiPhase = 'idle' | 'preparing' | 'playing'
 
-export function ListenAgainButton({ word, lang, className = '' }: ButtonProps) {
+export function ListenAgainButton({
+  word,
+  lang,
+  className = '',
+  iconOnly = false,
+}: ButtonProps) {
   const { t } = useTranslation()
   const [phase, setPhase] = useState<ListenUiPhase>('idle')
   const clickToken = useRef(0)
@@ -52,6 +59,7 @@ export function ListenAgainButton({ word, lang, className = '' }: ButtonProps) {
       : phase === 'preparing'
         ? preparingLabel
         : t('practice.listen')
+  const ariaLabel = iconOnly ? t('words.listenA11y', { word }) : label
 
   function onListen() {
     unlockAudio()
@@ -72,13 +80,15 @@ export function ListenAgainButton({ word, lang, className = '' }: ButtonProps) {
   return (
     <button
       type="button"
-      className={`btn listen-again-btn ${busy ? `listen-again-btn--${phase}` : ''} ${className}`.trim()}
+      className={`btn listen-again-btn ${iconOnly ? 'listen-again-btn--icon' : ''} ${busy ? `listen-again-btn--${phase}` : ''} ${className}`.trim()}
       onClick={onListen}
       aria-busy={busy}
-      aria-live="polite"
+      aria-live={iconOnly ? undefined : 'polite'}
+      aria-label={iconOnly ? ariaLabel : undefined}
+      title={iconOnly ? ariaLabel : undefined}
     >
       <ListenIcon className="listen-again-btn__icon" size="sm" />
-      <span className="listen-again-btn__label">{label}</span>
+      {!iconOnly ? <span className="listen-again-btn__label">{label}</span> : null}
     </button>
   )
 }
