@@ -1,29 +1,29 @@
 {
   "classId": "default",
-  "weekLabel": "16 Oct 2026",
+  "weekLabel": "23 Oct 2026",
   "english": [
-    "diversity",
-    "culture",
-    "different",
-    "France",
-    "Paris",
+    "around",
+    "world",
+    "mountain",
+    "desert",
+    "jungle",
     "ocean",
-    "tall",
-    "dry",
-    "water",
-    "cold"
+    "island",
+    "forest",
+    "travel",
+    "explore"
   ],
   "spanish": [
-    "caballo",
-    "queso",
-    "quinto",
-    "coca",
-    "cuento",
-    "peca",
-    "paquete",
-    "esquimal",
-    "rico",
-    "acuario"
+    "carne",
+    "quemada",
+    "quilo",
+    "cóctel",
+    "cuerno",
+    "arca",
+    "ataque",
+    "mantequilla",
+    "barco",
+    "escuela"
   ],
-  "publishedAt": "2026-10-16T20:00:00Z"
+  "publishedAt": "2026-10-23T18:53:00Z"
 }
