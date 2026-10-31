@@ -1,29 +1,29 @@
 {
   "classId": "default",
-  "weekLabel": "23 Oct 2026",
+  "weekLabel": "31 Oct 2026",
   "english": [
-    "around",
-    "world",
-    "mountain",
-    "desert",
-    "jungle",
-    "ocean",
-    "island",
-    "forest",
-    "travel",
-    "explore"
+    "habitat",
+    "beach",
+    "animal",
+    "equal",
+    "Europe",
+    "because",
+    "incredible",
+    "large",
+    "happy",
+    "people"
   ],
   "spanish": [
-    "carne",
-    "quemada",
-    "quilo",
-    "cóctel",
-    "cuerno",
-    "arca",
-    "ataque",
-    "mantequilla",
-    "barco",
-    "escuela"
+    "el gato",
+    "la goma",
+    "el gusto",
+    "el guía",
+    "la guerra",
+    "la carga",
+    "el amigo",
+    "el canguro",
+    "el guepardo",
+    "el esguince"
   ],
-  "publishedAt": "2026-10-23T18:53:00Z"
+  "publishedAt": "2026-10-31T12:00:00Z"
 }
