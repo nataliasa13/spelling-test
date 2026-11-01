@@ -26,6 +26,8 @@ import { LiveLetterFeedback } from '../components/LiveLetterFeedback'
 import { MinigamePlayer, type MinigamePersistedState } from '../components/MinigamePlayer'
 import { loadLiveLetterHint } from '../lib/storage'
 import { PaperDictationPlayer } from '../components/PaperDictationPlayer'
+import { SentenceDictationPlayer } from '../components/SentenceDictationPlayer'
+import { hasSentence } from '../lib/sentence'
 import { SectionListenGate } from '../components/SectionListenGate'
 import { PracticeFinishScreen } from '../components/PracticeFinishScreen'
 import {
@@ -382,7 +384,7 @@ export function PracticePage() {
   ])
 
   useEffect(() => {
-    if (!week || !practiceLang || mode === 'paper') return
+    if (!week || !practiceLang || mode === 'paper' || mode === 'sentence') return
 
     // En las pantallas de elegir no se guarda ni se borra: solo las acciones explícitas borran.
     if (mode === 'dictation' && dictationSession === 'pick') return
@@ -537,7 +539,7 @@ export function PracticePage() {
   if (!practiceLang) return <Navigate to="/" replace />
   if (mode === 'free') return <Navigate to="/practice/dictation" replace />
   if (
-    !['mission', 'free', 'challenge', 'mistakes', 'paper', 'dictation', 'minigames'].includes(
+    !['mission', 'free', 'challenge', 'mistakes', 'paper', 'sentence', 'dictation', 'minigames'].includes(
       mode,
     )
   ) {
@@ -556,6 +558,11 @@ export function PracticePage() {
         words={getWordsForLang(week, practiceLang)}
       />
     )
+  }
+
+  if (mode === 'sentence') {
+    if (!hasSentence(week, practiceLang)) return <Navigate to="/" replace />
+    return <SentenceDictationPlayer week={week} lang={practiceLang} />
   }
 
   const titleKey =

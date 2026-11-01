@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { PracticeMode } from '../types'
@@ -14,10 +15,12 @@ type Props = {
   playAgainLabel?: string
   onChangeMode?: () => void
   changeModeLabel?: string
+  /** Contenido extra bajo la pista (p. ej. la frase para corregir). */
+  children?: ReactNode
 }
 
 function celebrationEmoji(kind: FinishKind, score: number, total: number): string {
-  if (kind === 'paper') return '📝'
+  if (kind === 'paper' || kind === 'sentence') return '📝'
   if (kind === 'minigames') return '🎮'
   if (kind === 'challenge') {
     if (score >= total) return '🥇'
@@ -40,6 +43,7 @@ export function PracticeFinishScreen({
   playAgainLabel,
   onChangeMode,
   changeModeLabel,
+  children,
 }: Props) {
   const { t } = useTranslation()
   const emoji = celebrationEmoji(kind, score, total)
@@ -55,12 +59,14 @@ export function PracticeFinishScreen({
             ? 'practice.finishMinigamesTitle'
             : kind === 'paper'
               ? 'practice.finishPaperTitle'
-              : 'practice.finishFreeTitle'
+              : kind === 'sentence'
+                ? 'practice.finishSentenceTitle'
+                : 'practice.finishFreeTitle'
 
   const title =
     kind === 'challenge' && medalLine ? medalLine : t(titleKey)
 
-  const showScore = kind !== 'minigames' && kind !== 'paper' && total > 0
+  const showScore = kind !== 'minigames' && kind !== 'paper' && kind !== 'sentence' && total > 0
 
   return (
     <main className={`page finish-screen finish-screen--${kind}`}>
@@ -91,9 +97,10 @@ export function PracticeFinishScreen({
         {kind === 'mistakes' && (
           <p className="finish-screen__hint muted">{t('practice.finishMistakesHint')}</p>
         )}
-        {kind === 'paper' && (
+        {(kind === 'paper' || kind === 'sentence') && (
           <p className="finish-screen__hint muted">{t('practice.finishPaperHint')}</p>
         )}
+        {children}
         <div className="finish-screen__actions btn-row">
           {onPlayAgain && playAgainLabel && (
             <button type="button" className="btn btn--primary" onClick={onPlayAgain}>

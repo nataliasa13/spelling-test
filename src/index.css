@@ -1026,6 +1026,24 @@ button.activity-choice:not(:disabled):active {
   box-shadow: 0 2px 8px rgb(95 135 137 / 18%);
 }
 
+.sentence-dictation__text {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 72%);
+  text-align: left;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.sentence-dictation__text p {
+  margin: 0 0 0.5rem;
+}
+
+.sentence-dictation__text p:last-child {
+  margin-bottom: 0;
+}
+
 .activity-choice--mission {
   background: linear-gradient(135deg, rgb(131 168 70 / 22%), rgb(237 174 68 / 18%));
   border-color: rgb(131 168 70 / 45%);
@@ -1040,6 +1058,19 @@ button.activity-choice:not(:disabled):active {
 .activity-choice--mission-done {
   border-color: rgb(131 168 70 / 55%);
   background: linear-gradient(135deg, rgb(131 168 70 / 16%), rgb(131 168 70 / 6%));
+}
+
+.activity-choice__stat.activity-choice__new-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 1;
+  color: #fff;
+  background: #e0533d;
+  box-shadow: 0 2px 6px rgb(224 83 61 / 35%);
 }
 
 .activity-choice__stat.activity-choice__done-badge {

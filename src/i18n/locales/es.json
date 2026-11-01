@@ -50,7 +50,10 @@
     "wordsProgressA11y": "Palabras de la semana, {{mastered}} de {{total}} dominadas en dictado",
     "activityDareSub": "Todas las palabras, sin pistas",
     "paperDictation": "Dictado en papel",
-    "activityPaperSub": "Escucha y escribe en el cuaderno con lápiz"
+    "activityPaperSub": "Escucha y escribe en el cuaderno con lápiz",
+    "sentenceDictation": "Dictado de frase",
+    "activitySentenceSub": "Toda la lista como frase, con comas y puntos",
+    "newBadge": "Nuevo"
   },
   "words": {
     "title": "Palabras de la semana",
@@ -171,7 +174,15 @@
     "medalGold": "¡Estrella de oro — {{total}}/{{total}}!",
     "scoreLine": "Has acertado {{score}} de {{total}}",
     "liveLettersHint": "Verde = letra bien · rojo = revisa",
-    "liveLettersA11y": "Letras mientras escribes: verde correcta, rojo incorrecta"
+    "liveLettersA11y": "Letras mientras escribes: verde correcta, rojo incorrecta",
+    "sentenceTitle": "Dictado de frase",
+    "sentenceSetupLead": "La frase en {{count}} trozos — escríbela en el cuaderno.",
+    "sentenceSetupHint": "La app dice cada trozo y los signos: «coma», «punto y aparte», «punto»…",
+    "sentenceStart": "Primer trozo",
+    "sentenceActiveHint": "Escribe el trozo y el signo. Cuando termines, pulsa para seguir.",
+    "sentenceNext": "Siguiente trozo",
+    "sentenceChunkA11y": "Trozo {{current}} — escucha y escribe en papel",
+    "finishSentenceTitle": "¡Frase dictada!"
   },
   "childName": {
     "welcomeTitle": "¿Cómo te llamas?",

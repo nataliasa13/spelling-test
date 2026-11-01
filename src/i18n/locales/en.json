@@ -50,7 +50,10 @@
     "wordsProgressA11y": "This week's words, {{mastered}} of {{total}} mastered in dictation",
     "activityDareSub": "All words, no hints",
     "paperDictation": "Paper dictation",
-    "activityPaperSub": "Listen and write in your notebook with a pencil"
+    "activityPaperSub": "Listen and write in your notebook with a pencil",
+    "sentenceDictation": "Sentence dictation",
+    "activitySentenceSub": "The whole list as a sentence, with commas and full stops",
+    "newBadge": "New"
   },
   "words": {
     "title": "This week's words",
@@ -171,7 +174,15 @@
     "medalGold": "Gold star — {{total}}/{{total}}!",
     "scoreLine": "You got {{score}} out of {{total}}",
     "liveLettersHint": "Green = good letter · red = check it",
-    "liveLettersA11y": "Letters as you type: green correct, red wrong"
+    "liveLettersA11y": "Letters as you type: green correct, red wrong",
+    "sentenceTitle": "Sentence dictation",
+    "sentenceSetupLead": "The sentence in {{count}} parts — write it in your notebook.",
+    "sentenceSetupHint": "The app says each part and the punctuation: “comma”, “new paragraph”, “full stop”…",
+    "sentenceStart": "First part",
+    "sentenceActiveHint": "Write the part and the punctuation. When you are done, tap to continue.",
+    "sentenceNext": "Next part",
+    "sentenceChunkA11y": "Part {{current}} — listen and write on paper",
+    "finishSentenceTitle": "Sentence done!"
   },
   "childName": {
     "welcomeTitle": "What's your name?",

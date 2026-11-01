@@ -10,6 +10,10 @@ export type WeekPack = {
   weekLabel: string
   english: string[]
   spanish: string[]
+  /** Por idioma: además de palabras sueltas, se puede dictar como frase. Por defecto false. */
+  sentence?: Partial<Record<SpellingLang, boolean>>
+  /** Texto de la frase (una línea por párrafo). Si falta, se monta con las palabras de la lista. */
+  sentenceText?: Partial<Record<SpellingLang, string>>
   publishedAt: string
 }
 
@@ -39,5 +43,6 @@ export type PracticeMode =
   | 'challenge'
   | 'mistakes'
   | 'paper'
+  | 'sentence'
   | 'dictation'
   | 'minigames'

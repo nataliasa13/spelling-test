@@ -8,6 +8,8 @@ import {
   countWordsWithMistakes,
   isMissionCompleteToday,
 } from '../lib/progress'
+import { hasSentence } from '../lib/sentence'
+import { loadSentenceDictationUsed } from '../lib/storage'
 import type { SpellingLang } from '../types'
 
 export function HomePage() {
@@ -27,6 +29,8 @@ export function HomePage() {
   const mistakeWordCount =
     practiceLang && week ? countWordsWithMistakes(progress, practiceLang, langList) : 0
   const missionDoneToday = isMissionCompleteToday(progress)
+  const sentenceAvailable = !!(practiceLang && week && hasSentence(week, practiceLang))
+  const sentenceIsNew = sentenceAvailable && !loadSentenceDictationUsed()
 
   return (
     <main
@@ -68,6 +72,29 @@ export function HomePage() {
                 →
               </span>
             </Link>
+
+            {sentenceAvailable ? (
+              <Link
+                to="/practice/sentence"
+                className="activity-choice activity-choice--paper activity-choice--sentence activity-choice--full"
+              >
+                <span className="activity-choice__icon activity-choice__icon--lg" aria-hidden>
+                  🖊️
+                </span>
+                <span className="activity-choice__body">
+                  <span className="activity-choice__title">{t('home.sentenceDictation')}</span>
+                  <span className="activity-choice__sub">{t('home.activitySentenceSub')}</span>
+                </span>
+                {sentenceIsNew ? (
+                  <span className="activity-choice__stat activity-choice__new-badge">
+                    {t('home.newBadge')}
+                  </span>
+                ) : null}
+                <span className="activity-choice__go" aria-hidden>
+                  →
+                </span>
+              </Link>
+            ) : null}
 
             <Link
               to="/practice/mission"

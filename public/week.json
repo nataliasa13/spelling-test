@@ -25,5 +25,12 @@
     "el guepardo",
     "el esguince"
   ],
-  "publishedAt": "2026-10-31T12:00:00Z"
+  "sentence": {
+    "english": false,
+    "spanish": true
+  },
+  "sentenceText": {
+    "spanish": "El gato, la goma, el gusto, el guía, la guerra.\nLa carga, el amigo, el canguro, el guepardo, el esguince."
+  },
+  "publishedAt": "2026-11-01T00:00:00Z"
 }

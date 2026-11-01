@@ -7,6 +7,16 @@
    La app solo aplica la semana publicada si su `publishedAt` es más reciente que la que tiene cada dispositivo.
 3. Commit a `main`. El workflow `Deploy to GitHub Pages` despliega en 1–2 minutos.
 
+### Dictado de frase (opcional)
+
+Si un idioma también se dicta como frase, añade `"sentence": { "spanish": true }` (por defecto `false`).
+En el menú aparece **Dictado de frase**, que dicta trozo a trozo diciendo los signos («coma», «punto y aparte», «punto»).
+El texto sale de `sentenceText` (una línea por párrafo); si no está, se monta con las palabras separadas por comas:
+
+```json
+"sentenceText": { "spanish": "El gato, la goma, la guerra.\nLa carga, el amigo." }
+```
+
 Las familias reciben las palabras al abrir la app (o al volver a la pestaña); sin red se queda la última semana guardada.
 
 ---

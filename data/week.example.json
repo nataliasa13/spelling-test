@@ -3,5 +3,6 @@
   "weekLabel": "Semana ejemplo",
   "english": ["school", "friend"],
   "spanish": ["escuela", "amigo"],
+  "sentence": { "english": false, "spanish": false },
   "publishedAt": "2026-01-01T00:00:00.000Z"
 }

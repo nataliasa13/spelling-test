@@ -10,6 +10,7 @@ const KEYS = {
   childName: 'spellings_child_name',
   liveLetters: 'spellings_live_letters',
   paperDictationShuffle: 'spellings_paper_dictation_shuffle',
+  sentenceDictationUsed: 'spellings_sentence_dictation_used',
   speechEngineEnglish: 'spellings_speech_engine_english',
   speechEngineSpanish: 'spellings_speech_engine_spanish',
   deviceVoiceEnglish: 'spellings_device_voice_english',
@@ -112,6 +113,15 @@ export function loadPaperDictationShuffle(): boolean {
 export function savePaperDictationShuffle(shuffle: boolean): void {
   if (shuffle) localStorage.setItem(KEYS.paperDictationShuffle, '1')
   else localStorage.removeItem(KEYS.paperDictationShuffle)
+}
+
+/** Para el badge «Nuevo» del dictado de frase: se quita al empezarlo por primera vez. */
+export function loadSentenceDictationUsed(): boolean {
+  return localStorage.getItem(KEYS.sentenceDictationUsed) === '1'
+}
+
+export function markSentenceDictationUsed(): void {
+  localStorage.setItem(KEYS.sentenceDictationUsed, '1')
 }
 
 /** Predeterminado: Piper (offline). */
