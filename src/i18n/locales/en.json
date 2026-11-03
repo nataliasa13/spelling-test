@@ -57,6 +57,8 @@
   },
   "words": {
     "title": "This week's words",
+    "wordsSection": "Words",
+    "sentencesTitle": "Sentences",
     "paperDictation": "Paper dictation",
     "paperDictationHint": "The app says each word; your child writes in their notebook.",
     "english": "English",

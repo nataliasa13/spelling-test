@@ -57,6 +57,8 @@
   },
   "words": {
     "title": "Palabras de la semana",
+    "wordsSection": "Palabras",
+    "sentencesTitle": "Frases",
     "paperDictation": "Dictado en papel",
     "paperDictationHint": "La app dice cada palabra; el niño o niña escribe en el cuaderno.",
     "english": "Inglés",

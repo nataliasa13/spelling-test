@@ -6,19 +6,24 @@ import { useAppState } from '../context/AppState'
 import { ListenAgainButton } from '../components/ListenAgainButton'
 import { FrequentMistakesPanel } from '../components/FrequentMistakesPanel'
 import { getFrequentMistakes, getWordProgress } from '../lib/progress'
+import { getSentenceText, hasSentence } from '../lib/sentence'
+import type { SpellingLang } from '../types'
 
 function WordList({
   words,
   lang,
+  heading,
 }: {
   words: string[]
-  lang: 'english' | 'spanish'
+  lang: SpellingLang
+  heading?: string
 }) {
   const { t } = useTranslation()
   const { progress } = useAppState()
 
   return (
-    <section className="card" aria-label={t('words.title')}>
+    <section className="card" aria-label={heading ?? t('words.title')}>
+      {heading ? <h3 className="words-section-title">{heading}</h3> : null}
       <ul className="word-list">
         {words.map((word) => {
           const wp = getWordProgress(progress, lang, word)
@@ -48,6 +53,30 @@ function WordList({
   )
 }
 
+function SentenceList({
+  paragraphs,
+  lang,
+}: {
+  paragraphs: string[]
+  lang: SpellingLang
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <section className="card" aria-label={t('words.sentencesTitle')}>
+      <h3 className="words-section-title">{t('words.sentencesTitle')}</h3>
+      <ul className="sentence-list">
+        {paragraphs.map((paragraph) => (
+          <li key={paragraph} className="sentence-pill">
+            <ListenAgainButton word={paragraph} lang={lang} iconOnly />
+            <span className="sentence-pill__text">{paragraph}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export function WordsPage() {
   const { t } = useTranslation()
   const location = useLocation()
@@ -60,6 +89,13 @@ export function WordsPage() {
   const words = getWordsForLang(week, practiceLang)
   const mistakes = getFrequentMistakes(progress, practiceLang, words, words.length)
   const showMistakes = location.hash === '#word-mistakes'
+  const showSentences = hasSentence(week, practiceLang)
+  const sentenceParagraphs = showSentences
+    ? getSentenceText(week, practiceLang)
+        .split(/\r?\n/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+    : []
 
   return (
     <main
@@ -84,7 +120,16 @@ export function WordsPage() {
       {showMistakes ? (
         <FrequentMistakesPanel mistakes={mistakes} />
       ) : (
-        <WordList words={words} lang={practiceLang} />
+        <>
+          {showSentences && sentenceParagraphs.length > 0 ? (
+            <SentenceList paragraphs={sentenceParagraphs} lang={practiceLang} />
+          ) : null}
+          <WordList
+            words={words}
+            lang={practiceLang}
+            heading={showSentences ? t('words.wordsSection') : undefined}
+          />
+        </>
       )}
     </main>
   )
