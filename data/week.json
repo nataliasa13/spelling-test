@@ -1,36 +1,28 @@
 {
   "classId": "default",
-  "weekLabel": "31 Oct 2026",
+  "weekLabel": "6 Nov 2026",
   "english": [
-    "habitat",
-    "beach",
-    "animal",
-    "equal",
-    "Europe",
-    "because",
-    "incredible",
-    "large",
-    "happy",
-    "people"
+    "holiday",
+    "travelled",
+    "visited",
+    "explored",
+    "flew",
+    "arrived",
+    "enjoyed",
+    "walked",
+    "played",
+    "stayed"
   ],
   "spanish": [
-    "el gato",
-    "la goma",
-    "el gusto",
-    "el guía",
-    "la guerra",
-    "la carga",
-    "el amigo",
-    "el canguro",
-    "el guepardo",
-    "el esguince"
+    "Quiero una gorra con dibujos.",
+    "Hoy tocaré la guitarra que me regalaron el domingo."
   ],
   "sentence": {
     "english": false,
     "spanish": true
   },
   "sentenceText": {
-    "spanish": "El gato, la goma, el gusto, el guía, la guerra.\nLa carga, el amigo, el canguro, el guepardo, el esguince."
+    "spanish": "Quiero una gorra con dibujos.\nHoy tocaré la guitarra que me regalaron el domingo."
   },
-  "publishedAt": "2026-11-01T00:00:00Z"
+  "publishedAt": "2026-11-06T18:10:00Z"
 }
