@@ -53,7 +53,28 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy_primary.outcome == 'success' && steps.deploy_primary.outputs.page_url || steps.deploy_fallback.outputs.page_url }}
     steps:
-      - id: deployment
+      # La API de Pages a veces responde "Deployment failed, try again later" sin más detalle.
+      - id: deploy_primary
+        continue-on-error: true
         uses: actions/deploy-pages@v5
+
+      - name: Esperar y reintentar despliegue (fallo transitorio de Pages)
+        if: steps.deploy_primary.outcome == 'failure'
+        run: sleep 60
+
+      - id: deploy_fallback
+        if: steps.deploy_primary.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+
+      - name: Comprobar que el despliegue terminó bien
+        if: always()
+        run: |
+          if [ "${{ steps.deploy_primary.outcome }}" = "success" ]; then
+            exit 0
+          fi
+          if [ "${{ steps.deploy_fallback.outcome }}" = "success" ]; then
+            exit 0
+          fi
+          echo "::error::El despliegue a GitHub Pages falló (intento 1 y 2)." && exit 1
