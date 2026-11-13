@@ -1,28 +1,36 @@
 {
   "classId": "default",
-  "weekLabel": "6 Nov 2026",
+  "weekLabel": "13 Nov 2026",
   "english": [
-    "holiday",
-    "travelled",
-    "visited",
-    "explored",
-    "flew",
-    "arrived",
-    "enjoyed",
-    "walked",
-    "played",
-    "stayed"
+    "when",
+    "some",
+    "tall",
+    "longer",
+    "shorter",
+    "square",
+    "rectangle",
+    "same",
+    "different",
+    "little"
   ],
   "spanish": [
-    "Quiero una gorra con dibujos.",
-    "Hoy tocaré la guitarra que me regalaron el domingo."
+    "el jarabe",
+    "el genio",
+    "el gigante",
+    "el joven",
+    "el juego",
+    "la paja",
+    "la agenda",
+    "el colegio",
+    "el ajo",
+    "el conjuro"
   ],
   "sentence": {
     "english": false,
     "spanish": true
   },
   "sentenceText": {
-    "spanish": "Quiero una gorra con dibujos.\nHoy tocaré la guitarra que me regalaron el domingo."
+    "spanish": "El jarabe, el genio, el gigante, el joven, el juego.\nLa paja, la agenda, el colegio, el ajo, el conjuro."
   },
-  "publishedAt": "2026-11-06T18:10:00Z"
+  "publishedAt": "2026-11-13T17:59:00Z"
 }
