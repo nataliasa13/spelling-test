@@ -1,17 +1,17 @@
 {
   "classId": "default",
-  "weekLabel": "13 Nov 2026",
+  "weekLabel": "20 Nov 2026",
   "english": [
-    "when",
-    "some",
-    "tall",
-    "longer",
-    "shorter",
-    "square",
-    "rectangle",
-    "same",
-    "different",
-    "little"
+    "summary",
+    "explain",
+    "describe",
+    "question",
+    "answer",
+    "because",
+    "where",
+    "what",
+    "would",
+    "could"
   ],
   "spanish": [
     "el jarabe",
@@ -32,5 +32,5 @@
   "sentenceText": {
     "spanish": "El jarabe, el genio, el gigante, el joven, el juego.\nLa paja, la agenda, el colegio, el ajo, el conjuro."
   },
-  "publishedAt": "2026-11-13T17:59:00Z"
+  "publishedAt": "2026-11-20T20:17:00Z"
 }
