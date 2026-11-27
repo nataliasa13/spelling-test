@@ -1,36 +1,29 @@
 {
   "classId": "default",
-  "weekLabel": "20 Nov 2026",
+  "weekLabel": "27 Nov 2026",
   "english": [
-    "summary",
-    "explain",
-    "describe",
-    "question",
-    "answer",
-    "because",
-    "where",
-    "what",
-    "would",
-    "could"
+    "house",
+    "time",
+    "help",
+    "very",
+    "will",
+    "like",
+    "food",
+    "plant",
+    "chain",
+    "eat"
   ],
   "spanish": [
-    "el jarabe",
-    "el genio",
-    "el gigante",
-    "el joven",
-    "el juego",
-    "la paja",
-    "la agenda",
-    "el colegio",
-    "el ajo",
-    "el conjuro"
+    "En el río hay un pez rojo.",
+    "Me gusta jugar en el monte.",
+    "La oveja está en el prado."
   ],
   "sentence": {
     "english": false,
     "spanish": true
   },
   "sentenceText": {
-    "spanish": "El jarabe, el genio, el gigante, el joven, el juego.\nLa paja, la agenda, el colegio, el ajo, el conjuro."
+    "spanish": "En el río hay un pez rojo.\nMe gusta jugar en el monte.\nLa oveja está en el prado."
   },
-  "publishedAt": "2026-11-20T20:17:00Z"
+  "publishedAt": "2026-11-27T18:58:00Z"
 }
